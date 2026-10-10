@@ -406,6 +406,8 @@ Assembly|పూలు పేర్చుతున్నాయి
 Reveal|సిద్ధమవుతోంది
 Exploration|మీ బతుకమ్మ సిద్ధం
 active|ఎంపికలు
+Telugu font|తెలుగు ఫాంట్
+Bold headings, clean controls|స్పష్టమైన శీర్షికలు, సులువైన అక్షరాలు
 Skip to main content|ప్రధాన విషయానికి వెళ్లండి
 3D is unavailable.|3D అందుబాటులో లేదు.
 Drag to pan. Scroll to zoom. Arrow keys move; Home resets.|జరపడానికి లాగండి. దగ్గరగా చూడటానికి స్క్రోల్ చేయండి. బాణం కీలు జరుపుతాయి; Home రీసెట్ చేస్తుంది.

@@ -2,6 +2,7 @@
 import {Canvas,useFrame,useThree} from "@react-three/fiber";
 import {useEffect,useMemo,useRef} from "react";
 import * as THREE from "three";
+import {RoomEnvironment} from "three/examples/jsm/environments/RoomEnvironment.js";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {makeFlowerGeometry} from "@/lib/three/flowers";
 import {flowerAppearance} from "@/lib/flowers/appearance";
@@ -17,10 +18,17 @@ type Props={design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(ph
 export default function BathukammaScene(props:Props) {
   // Canvas fallback is ordinary canvas child content, mounted even when WebGL
   // works. Only renderer errors/context loss should activate the 2D fallback.
-  return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power"}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
+  return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:.92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
 }
 function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
   const {camera,gl,invalidate,size,scene}=useThree();
+  // Bake the studio reflections once per renderer, not per flower or frame.
+  useEffect(()=>{
+    const room=new RoomEnvironment(),generator=new THREE.PMREMGenerator(gl);
+    const map=generator.fromScene(room,.04),previous=scene.environment,previousIntensity=scene.environmentIntensity;
+    scene.environment=map.texture;scene.environmentIntensity=.14;invalidate();room.dispose();generator.dispose();
+    return ()=>{scene.environment=previous;scene.environmentIntensity=previousIntensity;map.dispose();};
+  },[gl,scene,invalidate]);
   const placements=useMemo(()=>generateLayout(design),[design]);
   const height=design.layers.reduce((s,l)=>s+l.rise,0)*.01;
   const contact=useMemo(()=>{
@@ -44,7 +52,7 @@ function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics
     };
     onCapture?.(capture);return ()=>onCapture?.(null);
   },[gl,scene,camera,invalidate,height,lowQuality,onCapture]);
-  const distanceFactor=Math.max(1,1.15/(size.width/size.height));
+  const distanceFactor=Math.max(storyProgress ? .82 : 1,(storyProgress ? .94 : 1.15)/(size.width/size.height));
   const flowerMeshes=useRef<(THREE.InstancedMesh|null)[]>([]);
   const support=useRef<THREE.Group>(null);
   const storyGroup=useRef<THREE.Group>(null);
@@ -119,19 +127,20 @@ function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics
     previousFactor.current=distanceFactor;invalidate();
   },[distanceFactor,camera,invalidate]);
   return <>
-    {!storyProgress&&<><color attach="background" args={["#EDF3F3"]}/><fog attach="fog" args={["#EDF3F3",12,25]}/></>}
-    <ambientLight intensity={.3}/><hemisphereLight args={["#F0F6FF","#63715E",.6]}/>
-    <directionalLight position={[-3,6,4]} intensity={2.15} color="#FFF4DE" castShadow={!lowQuality} shadow-mapSize={[1024,1024]} shadow-radius={3} shadow-camera-left={-2.5} shadow-camera-right={2.5} shadow-camera-top={3} shadow-camera-bottom={-2.5} shadow-camera-near={.1} shadow-camera-far={15} shadow-bias={-.00015} shadow-normalBias={.012}/>
-    <directionalLight position={[4,3,-4]} intensity={.75} color="#E5EEFF"/>
+    {!storyProgress&&<><color attach="background" args={["#FAFBFB"]}/><fog attach="fog" args={["#FAFBFB",12,25]}/></>}
+    <ambientLight intensity={.12}/><hemisphereLight args={["#F2F6FF","#59654D",.35]}/>
+    <directionalLight position={[-3.8,5.5,4.5]} intensity={1.9} color="#FFF3E4" castShadow={!lowQuality} shadow-mapSize={[1024,1024]} shadow-radius={4} shadow-camera-left={-2.5} shadow-camera-right={2.5} shadow-camera-top={3} shadow-camera-bottom={-2.5} shadow-camera-near={.1} shadow-camera-far={15} shadow-bias={-.00015} shadow-normalBias={.012}/>
+    <directionalLight position={[4,2.5,3]} intensity={.4} color="#E8F0FF"/>
+    <directionalLight position={[1.5,4,-4]} intensity={.75} color="#FFF8EC"/>
     <group ref={storyGroup}>
-    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={.67} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
+    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={.78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
     <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
-    <mesh position={[0,-.01,0]} receiveShadow><cylinderGeometry args={[1.88,1.83,.065,96]}/><meshStandardMaterial color="#BD9855" metalness={.55} roughness={.43}/></mesh>
-    <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D4B06A" metalness={.55} roughness={.4}/></mesh>
+    <mesh position={[0,-.01,0]} receiveShadow><cylinderGeometry args={[1.88,1.83,.065,96]}/><meshStandardMaterial color="#B69A60" metalness={.72} roughness={.32} envMapIntensity={.35}/></mesh>
+    <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D5B979" metalness={.78} roughness={.28} envMapIntensity={.4}/></mesh>
     </group>
-    {!storyProgress&&<group name="studio-floor">
-      <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.048,0]} receiveShadow><planeGeometry args={[200,200]}/><meshStandardMaterial color="#EDF3F3" roughness={1}/></mesh>
+    <group name="studio-floor">
+      {!storyProgress&&<mesh rotation={[-Math.PI/2,0,0]} position={[0,-.048,0]} receiveShadow><planeGeometry args={[200,200]}/><meshStandardMaterial color="#FAFBFB" roughness={1} envMapIntensity={.15}/></mesh>}
       <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.046,0]}><planeGeometry args={[5.2,5.2]}/><meshBasicMaterial map={contact} transparent depthWrite={false} toneMapped={false}/></mesh>
-    </group>}
+    </group>
   </>;
 }

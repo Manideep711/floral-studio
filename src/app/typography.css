@@ -36,3 +36,22 @@ html[data-typography=poppins] .hero-copy h1,html[data-typography=satoshi] .hero-
 .typography-options .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:540px){.typography-options{grid-template-columns:1fr}.typography-panel{padding:20px}.typography-footer{align-items:flex-start;flex-direction:column;gap:8px}.typography-trigger{left:12px;bottom:12px}.typography-specimen{margin-top:14px}}
 @media(prefers-reduced-motion:no-preference){.typography-dialog[open]{animation:typography-enter .18s ease-out}@keyframes typography-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
+
+@font-face{font-family:"Gidugu";src:url("/fonts/telugu/gidugu.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Lohit Telugu";src:url("/fonts/telugu/lohit.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Mallanna";src:url("/fonts/telugu/mallanna.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Annamayya";src:url("/fonts/telugu/annamayya.otf") format("opentype");font-weight:700;font-display:swap}
+@font-face{font-family:"Chathura";src:url("/fonts/telugu/chathura-500.ttf") format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Chathura";src:url("/fonts/telugu/chathura-200.ttf") format("truetype");font-weight:200;font-display:swap}
+@font-face{font-family:"RaviPrakash";src:url("/fonts/telugu/ravi-prakash.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"LakkiReddy";src:url("/fonts/telugu/lakki-reddy.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Clash Display";src:url("https://cdn.fontshare.com/wf/VFMK2COV3DN37JR7JQ4CAOJPZ7KWKNY7/ODD5YJNDLHZZB2MIT3DPVH4EIHAMZ34D/BSY64LPTT3OPLVKAZKL3AHKRWZ3D74AC.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Clash Display";src:url("https://cdn.fontshare.com/wf/FPDAZ2S6SW4QMSRIIKNNGTPM6VIXYMKO/5HNPQ453FRLIQWV2FNOBUU3FKTDZQVSG/Z3MGHFHX6DCTLQ55LJYRJ5MDCZPMFZU6.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Clash Display";src:url("https://cdn.fontshare.com/wf/BFBSY7LX5W2U2EROCLVVTQP4VS7S4PC3/IIUX4FGTMD2LK2VWD3RVTAS4SSMUN7B5/53RZKGODFYDW3QHTIL7IPOWTBCSUEZK7.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Satoshi";src:url("https://cdn.fontshare.com/wf/D7WD5OXZFWQ5T76HSPWAC7MNKAJXE2YG/LUGNSPO5YC34ABNB2O6K7AFDSOJZT56V/WNDVG7O66ENLOD43GS7FBUCC4KMT5OM2.woff2") format("woff2");font-weight:300;font-display:swap}
+@font-face{font-family:"Satoshi";src:url("https://cdn.fontshare.com/wf/TTX2Z3BF3P6Y5BQT3IV2VNOK6FL22KUT/7QYRJOI3JIMYHGY6CH7SOIFRQLZOLNJ6/KFIAZD4RUMEZIYV6FQ3T3GP5PDBDB6JY.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Satoshi";src:url("https://cdn.fontshare.com/wf/P2LQKHE6KA6ZP4AAGN72KDWMHH6ZH3TA/ZC32TK2P7FPS5GFTL46EU6KQJA24ZYDB/7AHDUZ4A7LFLVFUIFSARGIWCRQJHISQP.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Satoshi";src:url("https://cdn.fontshare.com/wf/LAFFD4SDUCDVQEXFPDC7C53EQ4ZELWQI/PXCT3G6LO6ICM5I3NTYENYPWJAECAWDD/GHM6WVH6MILNYOOCXHXB5GTSGNTMGXZR.woff2") format("woff2");font-weight:700;font-display:swap}
+html[data-typography=clash]{--serif:"Clash Display","Noto Sans Telugu",sans-serif;--sans:"Satoshi","Noto Sans Telugu",sans-serif}html[data-typography=clash] h1,html[data-typography=clash] h2,html[data-typography=clash] h3{font-weight:600}
+
+.typography-language{display:flex;align-items:center;justify-content:space-between;gap:16px}.typography-telugu{border-bottom:1px solid var(--line);padding:12px 0 20px;margin-bottom:20px}.typography-telugu-sample{font-size:36px;line-height:1.5;margin:16px 0 0}.typography-telugu-sample>span{font-size:19px}

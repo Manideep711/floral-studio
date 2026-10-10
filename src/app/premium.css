@@ -146,7 +146,7 @@ body { font-size: 14px; }
 .story-visual-track, .story-visual-track * { pointer-events: none!important; touch-action: pan-y!important; }
 .story-sculpture-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; }
 .story-visual figcaption { padding: 12px 0; text-align: center; font-size: 12px; color: var(--muted); }
-.story-chapter { min-height: 65svh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border-top: 1px solid var(--line); padding: 56px 0; scroll-margin-top: 32px; }
+.story-chapter { min-height: 55svh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; border-top: 1px solid var(--line); padding: 56px 0; scroll-margin-top: 32px; }
 .story-chapter h2, .story-finish h2 { font: 400 clamp(30px,3vw,40px)/1.15 var(--serif); letter-spacing: -.8px; margin: 18px 0; }
 .story-chapter>p:not(.eyebrow), .story-finish>p { font-size: 15px; line-height: 1.8; color: var(--muted); max-width: 420px; }
 .story-chapter>button { margin-top: 24px; }
@@ -162,17 +162,17 @@ body { font-size: 14px; }
 
 @media(max-width:700px) {
   .flower-story { display: block; padding: 0 16px; }
-  .story-copy>section, .story-copy>.story-chapter:nth-child(even), .story-copy>.story-finish { width: 56%; margin-left: 0; }
+  .story-copy>section, .story-copy>.story-chapter:nth-child(even), .story-copy>.story-finish { width: 51%; margin-left: 0; }
   .story-visual-track { position: absolute; inset: 0; padding: 0 8px 48px 0; background: transparent; }
-  .story-visual { position: sticky; width: 42%; margin-left: auto; top: max(72px,calc(32svh - 100px)); transform: none!important; }
-  .story-sculpture { height: clamp(150px,30svh,240px); }
+  .story-visual { position: sticky; width: 48%; margin-left: auto; top: max(72px,calc(32svh - 100px)); transform: none!important; }
+  .story-sculpture { height: clamp(170px,27svh,220px); }
   .story-sculpture-fallback { padding: 0; }
   .story-visual-heading { padding: 9px 12px; }
   .story-visual figcaption { display: none; }
-  .story-intro { min-height: 76svh; padding: 32px 0 44px; }
+  .story-intro { min-height: 60svh; padding: 32px 0 44px; }
   .story-intro h1 { font-size: clamp(27px,6.2vw,40px); letter-spacing: -.8px; overflow-wrap: anywhere; }
   .story-intro .hero-description { font-size: 15px; margin: 20px 0; }
-  .story-chapter { min-height: 65svh; padding: 36px 0; scroll-margin-top: 32px; }
+  .story-chapter { min-height: 50svh; padding: 28px 0; scroll-margin-top: 32px; }
   .story-finish { padding: 36px 0 48px; scroll-margin-top: 32px; }
   .story-chapter h2, .story-finish h2 { font-size: clamp(25px,5vw,32px); }
   .story-copy .primary-button, .story-copy .secondary-button { max-width: 100%; white-space: normal; padding: 12px; gap: 8px; }
@@ -511,3 +511,17 @@ body { font-size: 14px; }
 .garden-find-mine { position: absolute; top: 14px; right: 14px; z-index: 2; box-shadow: 0 3px 12px #153d3615; }
 .garden-plain .festival-camera { flex-wrap: wrap; }
 .garden-plain .festival-camera [aria-pressed="true"] { color: #fff; background: #1b5049; border-radius: 6px; }
+
+.viewer-splash .sequence-center-trace{animation:sequence-draw 300ms ease-in-out 80ms forwards}.viewer-splash .sequence-petal-trace{animation:sequence-draw 210ms ease-in-out var(--trace-delay) forwards}@media(prefers-reduced-motion:reduce){.viewer-splash .sequence-center-trace,.viewer-splash .sequence-petal-trace{animation:none;stroke-dashoffset:0}}
+
+.text-animate{white-space:pre-wrap}.text-animate-segment{display:inline-block;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}.text-animate-line{display:block}
+.text-animate>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Text Animate owns the hero entrance; avoid stacking it with section CSS motion. */
+.story-intro>*{animation:none}.text-animate-segment{will-change:auto}
+
+
+/* Clean white surfaces across every route. */
+:root{--paper:#fff;--surface-soft:#f1f4f4;--line:#d6e0e2}
+body{background:#fff}
+.home-page .site-header{background:transparent}

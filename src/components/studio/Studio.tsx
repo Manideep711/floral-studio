@@ -1,4 +1,5 @@
 "use client";
+import ViewerLoading from "../ui/ViewerLoading";
 import {useLanguage} from "@/lib/i18n/LanguageProvider";
 import SiteHeader from "../ui/SiteHeader";
 import {SelectionGroup,SelectionHighlight} from "../ui/selection-motion";
@@ -161,4 +162,4 @@ function StudioDialog({type,onClose,onReset}: {type:"reset"|"about";onClose:()=>
   return <dialog ref={ref} className="studio-dialog" aria-labelledby="studio-dialog-title" onCancel={onClose} onClick={e=>{if(e.target===e.currentTarget) onClose();}}><div className="dialog-inner"><button className="icon-button dialog-close" aria-label={tr("Close dialog")} onClick={onClose}><Icon name="close"/></button><p className="eyebrow">{tr("Flowers")}</p><h2 id="studio-dialog-title">{type==="reset" ? tr("Reset your arrangement?") : tr("About Bathukamma")}</h2>{type==="reset" ? <><p>{tr("Restore the starter. You can undo this.")}</p><div className="dialog-actions"><button className="secondary-button" onClick={onClose}>{tr("Keep arranging")}</button><Button variant="danger" onClick={onReset}>{tr("Reset arrangement")}</Button></div></> : <><p>{tr("Bathukamma is Telangana’s flower festival. Flowers are stacked in circles, wider at the base.")}</p><p>{tr("This digital version includes Tangedu, Gunugu, Banti and rose. The pumpkin flower and turmeric Gouramma are not modelled yet.")}</p><p>{tr("A creative studio, rather than a ritual guide.")}</p><div className="source-links"><a href="https://www.telangana.gov.in/about/language-culture/" target="_blank" rel="noreferrer">{tr("Telangana cultural reference ↗")}</a><a href="https://powo.science.kew.org/taxon/urn%3Alsid%3Aipni.org%3Anames%3A518328-1" target="_blank" rel="noreferrer">{tr("Botanical reference: Tangedu ↗")}</a></div><button className="primary-button" onClick={onClose}>{tr("Back to my flowers")}</button></>}</div></dialog>;
 }
 
-function StudioLoading(){const {tr}=useLanguage();return <div className="viewer-loading" role="status">{tr("Opening your flower sculpture…")}</div>;}
+function StudioLoading(){return <ViewerLoading/>;}

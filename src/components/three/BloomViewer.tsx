@@ -1,5 +1,7 @@
 "use client";
 import {useLanguage} from "@/lib/i18n/LanguageProvider";
+import {AnimatePresence} from "motion/react";
+import ViewerLoading from "../ui/ViewerLoading";
 import dynamic from "next/dynamic";
 import {Component,useCallback,useEffect,useState,type ReactNode} from "react";
 import ArrangementCanvas from "../studio/ArrangementCanvas";
@@ -45,11 +47,12 @@ export default function BloomViewer({design,onBack,gardenEntry=false}:{design:De
   const fallback=illustrated||supported===false;
   const exploring=phase==="Exploration";
   return <main className="bloom-viewer" id={gardenEntry ? undefined : "main-content"} tabIndex={-1}>
+    <AnimatePresence>{!fallback&&!ready&&<ViewerLoading key="loading"/>}</AnimatePresence>
     <div className="bloom-header"><button className="text-button" onClick={onBack}><span className="back-arrow" aria-hidden="true">←</span> {gardenEntry ? tr("Back to garden") : tr("Back to arranging")}</button><span className="eyebrow">{tr("Your arrangement / 3D")}</span>{!gardenEntry&&<div className="bloom-view-toggle"><button className="text-button" onClick={()=>{if(supported===false){setSupported(true);setLowQuality(true);setIllustrated(false);}else setIllustrated(v=>!v);setReady(false);setPhase("Loading flowers");setCommand(c=>({type:"replay",id:c.id+1}));}}>{supported===false ? tr("Retry 3D") : fallback ? tr("Explore in 3D") : tr("Illustrated view")}</button></div>}<LanguageToggle/></div>
     <div className="bloom-title"><p className="eyebrow">{gardenEntry ? "FROM THE COMMUNITY GARDEN" : tr("Finished")}</p><h1>{gardenEntry ? design.personalization.title : tr("Your Bathukamma")}</h1><p>{gardenEntry ? "Explore the flowers in this shared arrangement." : fallback ? tr("Your Bathukamma.") : tr("Drag to rotate. Scroll to zoom.")}</p></div>
     <section className="bloom-stage" aria-label={tr("Bathukamma 3D viewer")} data-flower-count={metrics?.flowers} data-draw-calls={metrics?.drawCalls} data-triangles={metrics?.triangles} data-reveal-fps={metrics?.revealFps}>
       {!fallback && supported && <SceneBoundary onFailure={failed}><Scene design={design} reducedMotion={reduced} command={command} onPhase={setPhase} onReady={loaded} onFailure={failed} onMetrics={measured} onCapture={captureReady} lowQuality={lowQuality}/></SceneBoundary>}
-      {(fallback || !ready) && <div className={`bloom-illustration ${!fallback ? "loading" : ""}`}>{gardenEntry ? <><LogoMark size={40}/><p>{supported===false ? tr("This view needs 3D support.") : tr("Preparing the flowers…")}</p></> : <><ArrangementCanvas design={design} selected="" onSelect={()=>{}} profile={fallback} decorative/>{!fallback && <p>{tr("Preparing your flower sculpture…")}</p>}</>}</div>}
+      {fallback && <div className={`bloom-illustration ${!fallback ? "loading" : ""}`}>{gardenEntry ? <><LogoMark size={40}/><p>{supported===false ? tr("This view needs 3D support.") : tr("Preparing the flowers…")}</p></> : <><ArrangementCanvas design={design} selected="" onSelect={()=>{}} profile={fallback} decorative/>{!fallback && <p>{tr("Preparing your flower sculpture…")}</p>}</>}</div>}
       {!fallback && ready && <div className="reveal-status" role="status" aria-live="polite"><span className="status-dot"/>{exploring ? tr("Your Bathukamma is ready") : tr(phase)}</div>}
       {!fallback && ready && !reduced && phase==="Anticipation" && <div className="reveal-highlight" aria-hidden="true"/>}
       {!fallback && ready && !exploring && <button className="skip-reveal secondary-button" onClick={()=>action("skip")}>{tr("Skip reveal")} <Icon name="arrow" size={15}/></button>}
