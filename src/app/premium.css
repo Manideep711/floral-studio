@@ -161,19 +161,24 @@ body { font-size: 14px; }
 @media(prefers-reduced-motion:reduce) and (min-width:701px) { .story-copy>.story-chapter:nth-child(even), .story-copy>.story-finish { margin-left: 0; } }
 
 @media(max-width:700px) {
-  .flower-story { display: flex; flex-direction: column; gap: 0; padding: 0 20px; }
-  .story-copy>section { width: 100%; margin-left: 0; }
-  .story-visual-track { order: -1; position: sticky; top: 0; z-index: 5; width: 100%; padding: 0; margin-top: 16px; background: var(--paper); transform: translateZ(0); isolation: isolate; }
-  .story-visual { position: relative; width: 100%; margin: 0; top: auto; transform: none!important; }
-  .story-sculpture { height: clamp(130px,25svh,210px); }
+  .flower-story { display: block; padding: 0 16px; }
+  .story-copy>section, .story-copy>.story-chapter:nth-child(even), .story-copy>.story-finish { width: 56%; margin-left: 0; }
+  .story-visual-track { position: absolute; inset: 0; padding: 0 8px 48px 0; background: transparent; }
+  .story-visual { position: sticky; width: 42%; margin-left: auto; top: max(72px,calc(32svh - 100px)); transform: none!important; }
+  .story-sculpture { height: clamp(150px,30svh,240px); }
+  .story-sculpture-fallback { padding: 0; }
   .story-visual-heading { padding: 9px 12px; }
   .story-visual figcaption { display: none; }
-  .story-intro { min-height: 58svh; padding: 32px 0 44px; }
-  .story-intro h1 { font-size: clamp(37px,10vw,46px); letter-spacing: -1.3px; }
+  .story-intro { min-height: 76svh; padding: 32px 0 44px; }
+  .story-intro h1 { font-size: clamp(27px,6.2vw,40px); letter-spacing: -.8px; overflow-wrap: anywhere; }
   .story-intro .hero-description { font-size: 15px; margin: 20px 0; }
-  .story-chapter { min-height: 55svh; padding: 36px 0; scroll-margin-top: calc(25svh + 65px); }
-  .story-finish { padding: 36px 0 48px; scroll-margin-top: calc(25svh + 65px); }
-  .story-chapter h2, .story-finish h2 { font-size: 30px; }
+  .story-chapter { min-height: 65svh; padding: 36px 0; scroll-margin-top: 32px; }
+  .story-finish { padding: 36px 0 48px; scroll-margin-top: 32px; }
+  .story-chapter h2, .story-finish h2 { font-size: clamp(25px,5vw,32px); }
+  .story-copy .primary-button, .story-copy .secondary-button { max-width: 100%; white-space: normal; padding: 12px; gap: 8px; }
+  .story-copy .hero-signature { flex-wrap: wrap; gap: 8px; }
+  .story-copy .hero-signature>span:last-child { border-left: 0; padding-left: 0; }
+  .story-templates { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 }
 /* A browsable template library, with cached artwork instead of many live canvases. */
 .template-dialog { max-width: 960px; }

@@ -1,4 +1,5 @@
 "use client";
+import {useLanguage} from "@/lib/i18n/LanguageProvider";
 import {useId,useMemo} from "react";
 import {FlowerShape} from "../flowers/FlowerArt";
 import {generateLayout} from "@/lib/design/layout";
@@ -6,10 +7,11 @@ import type {Design} from "@/lib/design/schema";
 import {flowerAppearance} from "@/lib/flowers/appearance";
 import LayerSelection from "./LayerSelection";
 export default function ArrangementSvg({design,selected,onSelect,profile=false,decorative=false}: {design:Design;selected?:string;onSelect?:(id:string)=>void;profile?:boolean;decorative?:boolean}) {
+  const {tr,locale}=useLanguage();
   const uid=useId().replaceAll(":","");
   const placements=useMemo(()=>generateLayout(design),[design]);
   const totalRise=design.layers.reduce((a,l)=>a+l.rise,0);
-  return <svg className="arrangement-svg" viewBox={profile ? "-210 -185 420 280" : "-210 -210 420 420"} role={decorative ? "presentation" : "img"} aria-label={decorative ? undefined : `${design.layers.length}-layer Bathukamma, ${placements.length} flower heads. ${profile ? "Side profile" : "Top view"}.`}>
+  return <svg className="arrangement-svg" viewBox={profile ? "-210 -185 420 280" : "-210 -210 420 420"} role={decorative ? "presentation" : "img"} aria-label={decorative ? undefined : `${tr(`${design.layers.length} layers`)} · ${tr(`${placements.length} flowers`)} · ${profile ? tr("Side profile") : tr("Top view")}`}>
     <defs>
       <radialGradient id={`${uid}plate`}><stop stopColor="#E7C782"/><stop offset=".84" stopColor="#D4AE63"/><stop offset=".96" stopColor="#F0D594"/><stop offset="1" stopColor="#B38D4A"/></radialGradient>
       <filter id={`${uid}shadow`} x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="7" stdDeviation="8" floodColor="#59452C" floodOpacity=".17"/></filter>
@@ -29,7 +31,7 @@ export default function ArrangementSvg({design,selected,onSelect,profile=false,d
         </g>;
       })}
       {!decorative&&design.layers.map((l,i)=>selected===l.id ? <LayerSelection key={l.id} radius={l.radius} width={l.width} rise={l.rise} y={20-design.layers.slice(0,i).reduce((sum,layer)=>sum+layer.rise,0)} index={i} profile/> : null)}
-      <text x="0" y={-totalRise-5} textAnchor="middle" className="svg-label">A preview of your proportions</text>
+      <text x="0" y={-totalRise-5} textAnchor="middle" className="svg-label">{tr("A preview of your proportions")}</text>
     </g> : <g filter={`url(#${uid}shadow)`}>
       <circle r="188" fill={`url(#${uid}plate)`}/>
       <circle r="181" fill="none" stroke="#AF8A46" strokeWidth=".7"/>

@@ -1,4 +1,5 @@
 "use client";
+import {useLanguage} from "@/lib/i18n/LanguageProvider";
 import {useEffect,useMemo,useRef,useState} from "react";
 import markup from "@/lib/garden/flower-markup.json";
 import {generateLayout} from "@/lib/design/layout";
@@ -31,6 +32,7 @@ function sprite(key:string) {
   return pending;
 }
 export default function ArrangementCanvas({design,selected,onSelect,profile=false,decorative=false}: {design:Design;selected:string;onSelect:(id:string)=>void;profile?:boolean;decorative?:boolean}) {
+  const {tr,locale}=useLanguage();
   const ref=useRef<HTMLCanvasElement>(null);
   const layerCache=useRef(new Map<string,{key:string;canvas:HTMLCanvasElement}>());
   const [width,setWidth]=useState(420);
@@ -104,7 +106,7 @@ export default function ArrangementCanvas({design,selected,onSelect,profile=fals
   if(fallback)return <ArrangementSvg design={design} selected={selected} onSelect={onSelect} profile={profile} decorative={decorative}/>;
   let below=0;
   return <div className={`arrangement-canvas ${profile ? "profile" : ""}`}>
-    <canvas ref={ref} role="img" aria-label={`${design.layers.length}-layer Bathukamma, ${placements.length} flower heads. ${profile ? "Side profile" : "Top view"}.`}/>
+    <canvas ref={ref} role="img" aria-label={`${tr(`${design.layers.length} layers`)} · ${tr(`${placements.length} flowers`)} · ${profile ? tr("Side profile") : tr("Top view")}`}/>
     {!decorative&&<svg viewBox={profile ? "-210 -185 420 280" : "-210 -210 420 420"} aria-hidden="true">
       <g transform={`scale(${fit})`}>
       {design.layers.map(l=>{

@@ -1,4 +1,5 @@
 "use client";
+import {useLanguage} from "@/lib/i18n/LanguageProvider";
 import {Canvas,useThree} from "@react-three/fiber";
 import {canInspect,detailCandidates} from "@/lib/garden/inspection";
 import {memo,useEffect,useMemo,useRef,useState} from "react";
@@ -16,7 +17,7 @@ import GardenWorldLabel from "./GardenWorldLabel";
 export type FestivalCommand={id:number;type:"angle"|"home"|"in"|"out"|"forward"|"back"|"panLeft"|"panRight"|"jump";slot?:number};
 type Props={entries:GardenEntry[];anchor:number;command:FestivalCommand;onReady:()=>void;onFailure:()=>void;onNeighborhood?:(cell:HexCell)=>void;light:boolean;rotate:boolean;mineSlots:readonly number[]};
 const noRaycast=()=>{};
-export default function FestivalScene(props:Props){return <Canvas dpr={props.light ? 1 : [1,1.3]} frameloop="demand" camera={{position:[19,15,23],fov:43,near:.1,far:3000}} gl={{antialias:true,powerPreference:"low-power"}} fallback={<span>3D is unavailable.</span>}><World {...props}/></Canvas>;}
+export default function FestivalScene(props:Props){const {tr}=useLanguage();return <Canvas dpr={props.light ? 1 : [1,1.3]} frameloop="demand" camera={{position:[19,15,23],fov:43,near:.1,far:3000}} gl={{antialias:true,powerPreference:"low-power"}} fallback={<span>{tr("3D is unavailable.")}</span>}><World {...props}/></Canvas>;}
 function World({entries,anchor,command,onReady,onFailure,onNeighborhood,light,rotate,mineSlots}:Props){
   const [inspected,setInspected]=useState<GardenEntry[]>([]);
   const {camera,gl,invalidate,size}=useThree(),orbit=useRef<OrbitControls|null>(null);
