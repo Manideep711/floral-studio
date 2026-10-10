@@ -1,5 +1,7 @@
 # Make Your Own Digital Bathukamma
 
+Source repository: **floral-studio**.
+
 Original botanical studio, matching procedural 3D reveal, shared festival courtyard and personalized PNG cards. Next.js 16.4.0 / React 19.3.0 / TypeScript 7.0.2 / React Three Fiber 9.8.1 / Three.js 0.186.1. Versions and peer compatibility were checked against npm on 2026-10-09 and are pinned in package.json and package-lock.json.
 
 ## Run on Windows
