@@ -9,7 +9,7 @@ import LanguageToggle from "../ui/LanguageToggle";
 import Icon from "../ui/Icon";
 import LogoMark from "../ui/LogoMark";
 import type {Design} from "@/lib/design/schema";
-import type {SceneCommand,SceneMetrics} from "./BathukammaScene";
+import type {SceneCommand,SceneMetrics,StageStyle} from "./BathukammaScene";
 import GardenInvite from "../garden/GardenInvite";
 import ShareCard,{type BloomCapture} from "../share/ShareCard";
 const Scene=dynamic(()=>import("./BathukammaScene"),{ssr:false,loading:()=>null});
@@ -21,6 +21,7 @@ class SceneBoundary extends Component<{children:ReactNode;onFailure:()=>void},{f
 }
 export default function BloomViewer({design,onBack,gardenEntry=false}:{design:Design;onBack:()=>void;gardenEntry?:boolean}) {
   const {tr,locale}=useLanguage();
+  const [stage,setStage]=useState<StageStyle>("studio");
   const [supported,setSupported]=useState<boolean|null>(null);
   const [illustrated,setIllustrated]=useState(false);
   const [reduced,setReduced]=useState(false);
@@ -50,8 +51,9 @@ export default function BloomViewer({design,onBack,gardenEntry=false}:{design:De
     <AnimatePresence>{!fallback&&!ready&&<ViewerLoading key="loading"/>}</AnimatePresence>
     <div className="bloom-header"><button className="text-button" onClick={onBack}><span className="back-arrow" aria-hidden="true">←</span> {gardenEntry ? tr("Back to garden") : tr("Back to arranging")}</button><span className="eyebrow">{tr("Your arrangement / 3D")}</span>{!gardenEntry&&<div className="bloom-view-toggle"><button className="text-button" onClick={()=>{if(supported===false){setSupported(true);setLowQuality(true);setIllustrated(false);}else setIllustrated(v=>!v);setReady(false);setPhase("Loading flowers");setCommand(c=>({type:"replay",id:c.id+1}));}}>{supported===false ? tr("Retry 3D") : fallback ? tr("Explore in 3D") : tr("Illustrated view")}</button></div>}<LanguageToggle/></div>
     <div className="bloom-title"><p className="eyebrow">{gardenEntry ? "FROM THE COMMUNITY GARDEN" : tr("Finished")}</p><h1>{gardenEntry ? design.personalization.title : tr("Your Bathukamma")}</h1><p>{gardenEntry ? "Explore the flowers in this shared arrangement." : fallback ? tr("Your Bathukamma.") : tr("Drag to rotate. Scroll to zoom.")}</p></div>
-    <section className="bloom-stage" aria-label={tr("Bathukamma 3D viewer")} data-flower-count={metrics?.flowers} data-draw-calls={metrics?.drawCalls} data-triangles={metrics?.triangles} data-reveal-fps={metrics?.revealFps}>
-      {!fallback && supported && <SceneBoundary onFailure={failed}><Scene design={design} reducedMotion={reduced} command={command} onPhase={setPhase} onReady={loaded} onFailure={failed} onMetrics={measured} onCapture={captureReady} lowQuality={lowQuality}/></SceneBoundary>}
+    {!fallback&&<div className="lighting-options" role="group" aria-label="Lighting stage">{(["studio","daylight","evening"] as const).map(value=><button key={value} type="button" aria-pressed={stage===value} onClick={()=>setStage(value)}>{value==="studio"?"Studio":value==="daylight"?"Daylight":"Evening"}</button>)}</div>}
+    <section data-lighting={stage} className="bloom-stage" aria-label={tr("Bathukamma 3D viewer")} data-flower-count={metrics?.flowers} data-draw-calls={metrics?.drawCalls} data-triangles={metrics?.triangles} data-reveal-fps={metrics?.revealFps}>
+      {!fallback && supported && <SceneBoundary onFailure={failed}><Scene stage={stage} design={design} reducedMotion={reduced} command={command} onPhase={setPhase} onReady={loaded} onFailure={failed} onMetrics={measured} onCapture={captureReady} lowQuality={lowQuality}/></SceneBoundary>}
       {fallback && <div className={`bloom-illustration ${!fallback ? "loading" : ""}`}>{gardenEntry ? <><LogoMark size={40}/><p>{supported===false ? tr("This view needs 3D support.") : tr("Preparing the flowers…")}</p></> : <><ArrangementCanvas design={design} selected="" onSelect={()=>{}} profile={fallback} decorative/>{!fallback && <p>{tr("Preparing your flower sculpture…")}</p>}</>}</div>}
       {!fallback && ready && <div className="reveal-status" role="status" aria-live="polite"><span className="status-dot"/>{exploring ? tr("Your Bathukamma is ready") : tr(phase)}</div>}
       {!fallback && ready && !reduced && phase==="Anticipation" && <div className="reveal-highlight" aria-hidden="true"/>}

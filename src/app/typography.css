@@ -55,3 +55,12 @@ html[data-typography=poppins] .hero-copy h1,html[data-typography=satoshi] .hero-
 html[data-typography=clash]{--serif:"Clash Display","Noto Sans Telugu",sans-serif;--sans:"Satoshi","Noto Sans Telugu",sans-serif}html[data-typography=clash] h1,html[data-typography=clash] h2,html[data-typography=clash] h3{font-weight:600}
 
 .typography-language{display:flex;align-items:center;justify-content:space-between;gap:16px}.typography-telugu{border-bottom:1px solid var(--line);padding:12px 0 20px;margin-bottom:20px}.typography-telugu-sample{font-size:36px;line-height:1.5;margin:16px 0 0}.typography-telugu-sample>span{font-size:19px}
+
+@font-face{font-family:"Preview Lora";src:url("/fonts/lora-400.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Preview Lora";src:url("/fonts/lora-500.ttf") format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Preview Lora";src:url("/fonts/lora-600.ttf") format("truetype");font-weight:600;font-display:swap}
+@font-face{font-family:"Preview Lora";src:url("/fonts/lora-700.ttf") format("truetype");font-weight:700;font-display:swap}
+html[data-typography=editorial]{--serif:"Preview Lora",Georgia,serif;--sans:"Preview Poppins",sans-serif}
+html[data-typography=botanical]{--serif:"Preview Poppins",sans-serif;--sans:"Preview Lora",Georgia,serif}
+html[data-typography=botanical] h1,html[data-typography=botanical] h2,html[data-typography=botanical] h3{font-weight:700}
+html[data-typography=botanical] button,html[data-typography=botanical] input,html[data-typography=botanical] nav{font-family:"Preview Poppins",sans-serif}

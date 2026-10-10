@@ -10,6 +10,8 @@ const options=[
   {id:"satoshi",name:"Satoshi",description:"Clean and simple",heading:'"Preview Satoshi"',body:'"Preview Satoshi"'},
   {id:"instrument",name:"Instrument Serif + Sans",description:"Serif headings, clean controls",heading:'"Preview Instrument Serif"',body:'"Preview Instrument Sans"'},
   {id:"clash",name:"Clash Display + Satoshi",description:"Bold headings, clean controls",heading:'"Clash Display"',body:'"Satoshi"'},
+  {id:"editorial",name:"Lora + Poppins",description:"Editorial & romantic",heading:'"Preview Lora"',body:'"Preview Poppins"'},
+  {id:"botanical",name:"Poppins + Lora",description:"Modern & botanical",heading:'"Preview Poppins"',body:'"Preview Lora"'},
 ] as const;
 type FontChoice=typeof options[number]["id"];
 const teluguOptions=[{value:"noto",label:"Noto Sans Telugu"},{value:"gidugu",label:"Gidugu"},{value:"lohit",label:"Lohit Telugu"},{value:"mallanna",label:"Mallanna"},{value:"annamayya",label:"Annamayya"},{value:"chathura",label:"Chathura"},{value:"ravi",label:"Ravi Prakash"},{value:"lakki",label:"Lakki Reddy"}];
@@ -47,7 +49,7 @@ export default function TypographyController(){
         {TELUGU_ENABLED&&<div className="typography-telugu"><Select label={tr("Telugu font")} value={telugu} onValueChange={selectTelugu} options={teluguOptions}/><p lang="te" className="typography-telugu-sample" style={{fontFamily:`"${teluguFamilies[telugu]}", "Noto Sans Telugu", sans-serif`}}>మీ బతుకమ్మ<br/><span>పూలు ఎంచుకోండి. ఒక్కో వరుస పేర్చండి.</span></p></div>}
         <fieldset className="typography-options"><legend className="sr-only">{tr("Font pairing")}</legend>{options.map(option=><label key={option.id} className="typography-option" data-selected={choice===option.id}>
           <input type="radio" name="typography" value={option.id} checked={choice===option.id} onChange={()=>select(option.id)}/>
-          <span><strong style={{fontFamily:option.body}}>{tr(option.name)}</strong><span className="typography-description">{tr(option.description)}</span><span className="typography-specimen" style={{fontFamily:option.heading}}>{tr("Make a Bathukamma.")}</span><span className="typography-body-sample" style={{fontFamily:option.body}}>{tr("Choose flowers. Add a layer.")}</span></span>
+          <span><strong style={{fontFamily:option.body}}>{tr(option.name)}</strong><span className="typography-description">{tr(option.description)}</span><span className="typography-specimen" style={{fontFamily:option.heading,fontWeight:option.id==="botanical"?700:400}}>{tr("Make a Bathukamma.")}</span><span className="typography-body-sample" style={{fontFamily:option.body}}>{tr("Choose flowers. Add a layer.")}</span></span>
         </label>)}</fieldset>
         <div className="typography-footer"><button className="text-button" type="button" onClick={()=>{select("original");if(!TELUGU_ENABLED)return;setTelugu("noto");document.documentElement.dataset.teluguFont="noto";try{localStorage.removeItem("bathukamma:telugu-font:v1");}catch{setStorageUnavailable(true);}}}>{tr("Restore current fonts")}</button><span role="status">{storageUnavailable ? tr("Preview active · saving unavailable") : tr("Saved in this browser")}</span></div>
       </div>

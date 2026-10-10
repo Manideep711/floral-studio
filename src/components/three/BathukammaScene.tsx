@@ -14,14 +14,21 @@ import type {BloomCapture} from "../share/ShareCard";
 import type {MotionValue} from "motion/react";
 export type SceneCommand={type:"replay"|"skip"|"reset"|"left"|"right"|"in"|"out";id:number};
 export type SceneMetrics={flowers:number;drawCalls:number;triangles:number;revealFps:number};
-type Props={design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
+export type StageStyle="studio"|"daylight"|"evening";
+const stages={
+ studio:{background:"#FAFBFB",key:"#FFF3E4",fill:"#E8F0FF",rim:"#FFF8EC",ambient:.12,hemisphere:.35,keyPower:1.9,fillPower:.4,rimPower:.75,environment:.14},
+ daylight:{background:"#F4F7F5",key:"#FFFDF5",fill:"#E5F1FF",rim:"#FFFFFF",ambient:.2,hemisphere:.55,keyPower:1.6,fillPower:.7,rimPower:.5,environment:.2},
+ evening:{background:"#162B29",key:"#FFE0AE",fill:"#A8C9E5",rim:"#FFE9BD",ambient:.1,hemisphere:.25,keyPower:2.2,fillPower:.3,rimPower:1.2,environment:.1},
+} as const;
+type Props={stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
 export default function BathukammaScene(props:Props) {
   // Canvas fallback is ordinary canvas child content, mounted even when WebGL
   // works. Only renderer errors/context loss should activate the 2D fallback.
   return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:.92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
 }
-function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
+function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
   const {camera,gl,invalidate,size,scene}=useThree();
+  const lighting=stages[stage];
   // Bake the studio reflections once per renderer, not per flower or frame.
   useEffect(()=>{
     const room=new RoomEnvironment(),generator=new THREE.PMREMGenerator(gl);
@@ -29,6 +36,7 @@ function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics
     scene.environment=map.texture;scene.environmentIntensity=.14;invalidate();room.dispose();generator.dispose();
     return ()=>{scene.environment=previous;scene.environmentIntensity=previousIntensity;map.dispose();};
   },[gl,scene,invalidate]);
+  useEffect(()=>{scene.environmentIntensity=lighting.environment;invalidate();},[lighting,scene,invalidate]);
   const placements=useMemo(()=>generateLayout(design),[design]);
   const height=design.layers.reduce((s,l)=>s+l.rise,0)*.01;
   const contact=useMemo(()=>{
@@ -127,11 +135,11 @@ function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics
     previousFactor.current=distanceFactor;invalidate();
   },[distanceFactor,camera,invalidate]);
   return <>
-    {!storyProgress&&<><color attach="background" args={["#FAFBFB"]}/><fog attach="fog" args={["#FAFBFB",12,25]}/></>}
-    <ambientLight intensity={.12}/><hemisphereLight args={["#F2F6FF","#59654D",.35]}/>
-    <directionalLight position={[-3.8,5.5,4.5]} intensity={1.9} color="#FFF3E4" castShadow={!lowQuality} shadow-mapSize={[1024,1024]} shadow-radius={4} shadow-camera-left={-2.5} shadow-camera-right={2.5} shadow-camera-top={3} shadow-camera-bottom={-2.5} shadow-camera-near={.1} shadow-camera-far={15} shadow-bias={-.00015} shadow-normalBias={.012}/>
-    <directionalLight position={[4,2.5,3]} intensity={.4} color="#E8F0FF"/>
-    <directionalLight position={[1.5,4,-4]} intensity={.75} color="#FFF8EC"/>
+    {!storyProgress&&<><color attach="background" args={[lighting.background]}/><fog attach="fog" args={[lighting.background,12,25]}/></>}
+    <ambientLight intensity={lighting.ambient}/><hemisphereLight args={["#F2F6FF","#59654D",lighting.hemisphere]}/>
+    <directionalLight position={[-3.8,5.5,4.5]} intensity={lighting.keyPower} color={lighting.key} castShadow={!lowQuality} shadow-mapSize={[1024,1024]} shadow-radius={4} shadow-camera-left={-2.5} shadow-camera-right={2.5} shadow-camera-top={3} shadow-camera-bottom={-2.5} shadow-camera-near={.1} shadow-camera-far={15} shadow-bias={-.00015} shadow-normalBias={.012}/>
+    <directionalLight position={[4,2.5,3]} intensity={lighting.fillPower} color={lighting.fill}/>
+    <directionalLight position={[1.5,4,-4]} intensity={lighting.rimPower} color={lighting.rim}/>
     <group ref={storyGroup}>
     {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={.78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
     <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
@@ -139,7 +147,7 @@ function Scene({design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics
     <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D5B979" metalness={.78} roughness={.28} envMapIntensity={.4}/></mesh>
     </group>
     <group name="studio-floor">
-      {!storyProgress&&<mesh rotation={[-Math.PI/2,0,0]} position={[0,-.048,0]} receiveShadow><planeGeometry args={[200,200]}/><meshStandardMaterial color="#FAFBFB" roughness={1} envMapIntensity={.15}/></mesh>}
+      {!storyProgress&&<mesh rotation={[-Math.PI/2,0,0]} position={[0,-.048,0]} receiveShadow><planeGeometry args={[200,200]}/><meshStandardMaterial color={lighting.background} roughness={1} envMapIntensity={.15}/></mesh>}
       <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.046,0]}><planeGeometry args={[5.2,5.2]}/><meshBasicMaterial map={contact} transparent depthWrite={false} toneMapped={false}/></mesh>
     </group>
   </>;
