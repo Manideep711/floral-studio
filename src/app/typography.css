@@ -1,0 +1,38 @@
+@font-face{font-family:"Preview Poppins";src:url("/fonts/poppins-400.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Preview Poppins";src:url("/fonts/poppins-500.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Preview Poppins";src:url("/fonts/poppins-600.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Preview Poppins";src:url("/fonts/poppins-700.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Preview Instrument Sans";src:url("/fonts/instrument-sans.woff2") format("woff2");font-weight:400 700;font-display:swap}
+@font-face{font-family:"Preview Instrument Serif";src:url("/fonts/instrument-serif.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Preview Instrument Serif";src:url("/fonts/instrument-serif-italic.woff2") format("woff2");font-style:italic;font-weight:400;font-display:swap}
+/* Official Fontshare delivery keeps the proprietary font out of the source repository. */
+@font-face{font-family:"Preview Satoshi";src:url("https://cdn.fontshare.com/wf/NWBQYJIM7GCZ5XWD7D26ARB3VDY55ZRT/K63EV2KZIGKLE7RANQ2U42S6SVHU5RJ7/X6XYTKIVDUW7GZTZPZNN4EUM5KH54KHF.woff2") format("woff2");font-weight:300 900;font-display:swap}
+html[data-typography=poppins]{--serif:"Preview Poppins","Noto Sans Telugu",sans-serif;--sans:"Preview Poppins","Noto Sans Telugu",sans-serif}
+html[data-typography=satoshi]{--serif:"Preview Satoshi","Noto Sans Telugu",sans-serif;--sans:"Preview Satoshi","Noto Sans Telugu",sans-serif}
+html[data-typography=instrument]{--serif:"Preview Instrument Serif",Georgia,serif;--sans:"Preview Instrument Sans","Noto Sans Telugu",sans-serif}
+html[data-typography=instrument] h1,html[data-typography=instrument] h2,html[data-typography=instrument] h3,html[data-typography=instrument] .brand{font-weight:400}
+html[data-typography=poppins] .hero-copy h1,html[data-typography=satoshi] .hero-copy h1{letter-spacing:-.045em}
+.typography-trigger{position:fixed;bottom:18px;left:18px;z-index:40;display:flex;align-items:center;gap:9px;min-height:44px;padding:8px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 3px 16px #192e3112;font-size:12px}
+.typography-trigger>span:first-child{font-family:Georgia,serif;font-size:23px;line-height:1}
+.typography-dialog{width:min(680px,calc(100% - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);overflow:auto;box-shadow:0 24px 80px #192e312e}
+.typography-dialog::backdrop{background:#102e3650;backdrop-filter:blur(5px)}
+.typography-panel{padding:28px}
+.typography-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.typography-header h2{font:400 30px/1.2 var(--serif);margin-top:8px}
+.typography-header .icon-button{flex:none}
+.typography-intro{margin:14px 0 24px;color:var(--muted)}
+.typography-options{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.typography-option{display:flex;gap:12px;padding:18px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--surface)}
+.typography-option[data-selected=true]{border-color:var(--green);background:var(--selected);box-shadow:inset 0 0 0 1px var(--green)}
+.typography-option:focus-within{outline:3px solid var(--brass);outline-offset:3px}
+.typography-option input{flex:none;width:16px;height:16px;accent-color:var(--green);margin:3px 0 0}
+.typography-option>span{min-width:0;display:block}
+.typography-option strong{display:block;font-weight:600;font-size:14px}
+.typography-description{display:block;margin-top:4px;font-size:12px;line-height:1.5;color:var(--muted)}
+.typography-specimen{display:block;margin:22px 0 7px;font-size:27px;line-height:1.2;font-weight:400;letter-spacing:-.03em}
+.typography-body-sample{display:block;font-size:13px;line-height:1.5}
+.typography-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px}
+.typography-footer>span{font-size:12px;color:var(--muted)}
+.typography-options .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:540px){.typography-options{grid-template-columns:1fr}.typography-panel{padding:20px}.typography-footer{align-items:flex-start;flex-direction:column;gap:8px}.typography-trigger{left:12px;bottom:12px}.typography-specimen{margin-top:14px}}
+@media(prefers-reduced-motion:no-preference){.typography-dialog[open]{animation:typography-enter .18s ease-out}@keyframes typography-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}

@@ -10,6 +10,7 @@ export function useStoryGate(root:RefObject<HTMLDivElement|null>,step:number,red
       autoRaf:true,lerp:.12,smoothWheel:true,syncTouch:false,anchors:true,
       respectReducedMotion:true,stopInertiaOnNavigate:true,
       virtualScroll:data=>{
+        if((data.event.target as Element|null)?.closest?.("dialog"))return true;
         if(data.deltaY<=0||data.event.ctrlKey)return true;
         const remaining=Math.max(0,maximum.current()-lenis.targetScroll);
         if(remaining===0){if(data.event.cancelable)data.event.preventDefault();return false;}
@@ -41,13 +42,14 @@ export function useStoryGate(root:RefObject<HTMLDivElement|null>,step:number,red
     let touchY=0;
     const touchStart=(event:TouchEvent)=>{touchY=event.touches[0]?.clientY??0;};
     const touchMove=(event:TouchEvent)=>{
+      if((event.target as Element|null)?.closest?.("dialog"))return;
       const y=event.touches[0]?.clientY??touchY,down=touchY-y;touchY=y;
       if(step<4&&down>0&&window.scrollY>=limit()-1)event.preventDefault();
     };
     const key=(event:KeyboardEvent)=>{
       if(step===4||event.altKey||event.ctrlKey||event.metaKey)return;
       const target=event.target as HTMLElement;
-      if(target.closest("button,a,input,textarea,select"))return;
+      if(target.closest("dialog,button,a,input,textarea,select"))return;
       if(["End","PageDown","ArrowDown"," "].includes(event.key)&&window.scrollY>=limit()-1)event.preventDefault();
     };
     if(step<4){
