@@ -26,6 +26,7 @@ export function SlidingChoices({children,className,label,value}:{children:ReactN
     onPointerLeave={()=>{const focused=document.activeElement;move(focused instanceof HTMLButtonElement&&root.current?.contains(focused)?focused:root.current?.querySelector('button[aria-pressed="true"]')??null);}}
     onFocus={e=>{const button=(e.target as HTMLElement).closest<HTMLButtonElement>("button");if(button)move(button);}}
     onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))restore();}}>
+    {children}
     <motion.div aria-hidden="true" className="sliding-choice-indicator" initial={false}
       animate={box?{...box,opacity:1,scale:1}:{opacity:0,scale:.85}}
       transition={reduced?{duration:0}:{duration:.35,ease:[.22,1,.36,1]}}/>
