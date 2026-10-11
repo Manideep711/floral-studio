@@ -722,3 +722,14 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
 .morphy-sm { min-height:40px; font-size:12px; }
 @media(max-width:700px) { .morphy-button { padding-right:14px; font-size:12px; min-height:44px; max-width:100%; } }
 @media(prefers-reduced-motion:reduce) { .morphy-button,.morphy-disc,.morphy-flower { transition:none; } }
+.growing-title { position:relative; display:inline-block; isolation:isolate; }
+.title-garden { position:absolute; left:-3%; top:-28%; width:106%; height:150%; overflow:visible; pointer-events:none; }
+.title-stem { fill:none; stroke:#578264; stroke-width:1.7; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; animation:title-stem-grow 1.3s cubic-bezier(.45,0,.25,1) calc(var(--grow-delay) + var(--sprout-delay)) forwards; }
+.title-leaf { fill:#779b70; opacity:0; animation:title-leaf-grow .6s ease-out calc(var(--grow-delay) + var(--sprout-delay) + .65s) forwards; }
+.title-bloom { fill:#e7be53; transform:scale(0); animation:title-bloom-grow .65s cubic-bezier(.2,.75,.25,1.15) calc(var(--grow-delay) + var(--sprout-delay) + 1.05s) forwards; }
+.title-pollen { fill:#a87531; }
+@keyframes title-stem-grow { to {stroke-dashoffset:0;} }
+@keyframes title-leaf-grow { to {opacity:.85;} }
+@keyframes title-bloom-grow { to {transform:scale(1);} }
+@media(max-width:700px) { .title-sprout-1,.title-sprout-4 { display:none; } .title-stem { stroke-width:2; } }
+@media(prefers-reduced-motion:reduce) { .title-stem { animation:none; stroke-dashoffset:0; } .title-leaf { animation:none; opacity:.85; } .title-bloom { animation:none; transform:scale(1); } }
