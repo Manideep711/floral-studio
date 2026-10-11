@@ -753,5 +753,6 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
 .sliding-choice-indicator { position: absolute; top: 0; left: 0; pointer-events: none; z-index: -1; background: var(--selected); border: 1px solid #8ab2a5; border-radius: 10px; }
 .sliding-choices button { position: relative; background: transparent !important; }
 .story-templates.sliding-choices button:hover:not(:disabled),.story-templates.sliding-choices button:focus-visible { background: transparent; border-color: transparent; }
-.template-size-choices.sliding-choices button[aria-pressed=true],.template-height-choices.sliding-choices button[aria-pressed=true] { background: transparent; box-shadow: none; border-color: transparent; }
+.template-size-choices.sliding-choices button[aria-pressed=true],.template-height-choices.sliding-choices button[aria-pressed=true] { background: transparent; color: var(--ink); box-shadow: none; border-color: transparent; }
+.template-choice-field .sliding-choices button[aria-pressed=true] small { color: var(--muted); }
 .sliding-choices button:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
