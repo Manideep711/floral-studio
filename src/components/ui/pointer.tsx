@@ -1,12 +1,10 @@
 "use client";
-// Adapted from Magic UI Pointer (MIT), with delegated button hover handling.
+// Adapted from Magic UI Pointer (MIT), scoped to the studio; sliders keep native input.
 import {useEffect,useState} from "react";
 import {createPortal} from "react-dom";
 import {AnimatePresence,motion,useMotionValue,useReducedMotion} from "motion/react";
 import LogoMark from "./LogoMark";
-const targets='button,a.primary-button,a.secondary-button,a.text-button,a.icon-button';
-// Selection widgets may use native buttons too; retain their ordinary cursor.
-const selections='[aria-pressed],[aria-haspopup],[role="tab"],[role="checkbox"],[role="radio"],[role="switch"],[role="option"],.template-option,.template-starters,.story-templates';
+const sliders='[role="slider"],[data-slot="slider"],input[type="range"],.ui-slider';
 export default function FlowerPointer(){
  const x=useMotionValue(0),y=useMotionValue(0),reduced=useReducedMotion();
  const [host,setHost]=useState<HTMLElement|null>(null);
@@ -16,8 +14,8 @@ export default function FlowerPointer(){
   let current:HTMLElement|null=null;
   const hide=()=>{current?.removeAttribute("data-custom-pointer");current=null;setHost(null);};
   const move=(e:PointerEvent)=>{
-   const target=e.target instanceof Element ? e.target.closest<HTMLElement>(targets) : null;
-   if(!media.matches||e.pointerType!=="mouse"||!target||target.matches(':disabled,[aria-disabled="true"]')||target.closest(selections)){hide();return;}
+   const target=e.target instanceof HTMLElement ? e.target : e.target instanceof Element ? e.target.parentElement : null;
+   if(!media.matches||e.pointerType!=="mouse"||!target||target.closest(sliders)){hide();return;}
    x.set(e.clientX);y.set(e.clientY);
    if(current!==target){current?.removeAttribute("data-custom-pointer");current=target;current.setAttribute("data-custom-pointer","active");}
    setHost(target.closest<HTMLDialogElement>('dialog[open]')??document.body);
