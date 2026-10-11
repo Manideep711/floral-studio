@@ -733,3 +733,9 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
 @keyframes title-bloom-grow { to {transform:scale(1);} }
 @media(max-width:700px) { .title-sprout-1,.title-sprout-4 { display:none; } .title-stem { stroke-width:2; } }
 @media(prefers-reduced-motion:reduce) { .title-stem { animation:none; stroke-dashoffset:0; } .title-leaf { animation:none; opacity:.85; } .title-bloom { animation:none; transform:scale(1); } }
+@media(max-width:700px) {
+ .studio-page { padding-bottom:calc(92px + env(safe-area-inset-bottom)); }
+ .studio-page .studio-bottom { z-index:40; }
+ .studio-page .bloom-next { position:fixed; left:16px; right:16px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:40; padding:6px; border:1px solid #dce7e1; border-radius:16px; background:#ffffffef; box-shadow:0 8px 28px #173b3324; backdrop-filter:blur(8px); }
+ .studio-page .studio-bottom .bloom-next .shiny-button { width:100%; min-height:48px; font-size:14px; border-radius:11px; }
+}
