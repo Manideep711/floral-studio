@@ -11,3 +11,9 @@ html[data-language=te] [lang=te]{font-family:var(--sans)}
 
 /* Selected Telugu identity, including names shown within the English interface. */
 [lang=te] { font-family: "Mallanna", "Noto Sans Telugu", sans-serif; font-weight: 400; }
+
+html[data-language=te] { --sans:"Gidugu","Mallanna","Noto Sans Telugu",sans-serif; --serif:"Mallanna","Gidugu","Noto Sans Telugu",sans-serif; }
+html[data-language=te] h1,html[data-language=te] h2,html[data-language=te] h3 { font-family:var(--serif); font-weight:400; font-style:normal; }
+.language-toggle [lang=te] { font-family:"Mallanna",sans-serif; font-size:18px; font-weight:400; }
+html[data-language-transition=active]::view-transition-old(root),html[data-language-transition=active]::view-transition-new(root) { animation:none; mix-blend-mode:normal; }
+html[data-language-transition=active]::view-transition-group(root) { animation-duration:500ms; }

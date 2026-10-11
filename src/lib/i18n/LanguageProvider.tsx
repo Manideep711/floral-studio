@@ -1,8 +1,8 @@
 "use client";
 import {createContext,useContext,useEffect,useState,type ReactNode} from "react";
 import {translate,type Locale} from "./copy";
-// Keep translations and saved preferences for the later Telugu release.
-export const TELUGU_ENABLED=false;
+// Persist the language choice across pages and visits.
+export const TELUGU_ENABLED=true;
 const Context=createContext({locale:"en" as Locale,setLocale:(_locale:Locale)=>{},tr:(text:string)=>text});
 export function LanguageProvider({children}:{children:ReactNode}){
   const [locale,setLocale]=useState<Locale>("en");
