@@ -30,6 +30,5 @@ export function SlidingChoices({children,className,label,value}:{children:ReactN
     <motion.div aria-hidden="true" className="sliding-choice-indicator" initial={false}
       animate={box?{...box,opacity:1,scale:1}:{opacity:0,scale:.85}}
       transition={reduced?{duration:0}:{duration:.35,ease:[.22,1,.36,1]}}/>
-    {children}
   </div>;
 }
