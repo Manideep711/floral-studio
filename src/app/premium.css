@@ -1,4 +1,4 @@
-:root { --serif: var(--font-editorial), Georgia, serif; --sans: var(--font-interface), "Segoe UI", "Noto Sans Telugu", sans-serif; --paper: #f4f6f7; --surface: #ffffff; --surface-soft: #e9eef0; --ink: #192e31; --muted: #53676a; --line: #d6e0e2; --green: #18544a; --green-hover: #103e37; --selected: #e2efeb; --brass: #346d67; --warning-surface: #f2f5e9; --warning-ink: #48582c; }
+:root { --serif: var(--font-editorial), "Mallanna", Georgia, serif; --sans: var(--font-interface), "Mallanna", "Segoe UI", "Noto Sans Telugu", sans-serif; --paper: #f4f6f7; --surface: #ffffff; --surface-soft: #e9eef0; --ink: #192e31; --muted: #53676a; --line: #d6e0e2; --green: #18544a; --green-hover: #103e37; --selected: #e2efeb; --brass: #346d67; --warning-surface: #f2f5e9; --warning-ink: #48582c; }
 body { font-size: 14px; }
 .brand { font-family: var(--serif); font-weight: 500; font-size: 28px; }
 .brand-small { font-size: 11px; letter-spacing: .35px; }
@@ -139,7 +139,7 @@ body { font-size: 14px; }
 .story-intro .hero-description { max-width: 410px; }
 .story-skip { margin-top: 12px; }
 .story-visual-track { position: absolute; inset: 0; padding: 0 32px 84px; pointer-events: none; }
-.story-visual { position: sticky; width: calc(50% - 32px); margin-left: auto; top: max(24px,calc((100svh - 470px)/2 - 72px)); background: transparent; }
+.story-visual { position: sticky; width: calc(50% - 32px); margin-left: auto; top: max(12px,calc((100svh - 470px)/2 - 112px)); background: transparent; }
 .story-visual-heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .story-sculpture { height: min(clamp(300px,46vw,470px),calc(100svh - 160px)); position: relative; pointer-events: none; }
 /* R3F's event wrapper can opt back into pointer events: keep every story descendant inert. */
@@ -564,18 +564,17 @@ body:has(dialog[open]) .page-edge-blur,body:has(:focus-visible) .page-edge-blur{
  }
 }
 
-/* Static story dots: one painted pattern, no per-dot animation or resize work. */
+/* Static grid fades diagonally into the white story surface. */
 .flower-story { isolation: isolate; }
-.flower-story::before {
- content: "";
- position: absolute;
- inset: 0;
- z-index: -1;
- pointer-events: none;
- background-image: radial-gradient(circle, rgba(38,88,77,.19) .85px, transparent 1px);
- background-size: 24px 24px;
- mask-image: linear-gradient(to right,transparent,#000 12%,#000 88%,transparent);
- -webkit-mask-image: linear-gradient(to right,transparent,#000 12%,#000 88%,transparent);
-}
+.story-grid { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; color: #c8d9d2; mask-image: linear-gradient(135deg,#000 0%,#0008 38%,transparent 78%); -webkit-mask-image: linear-gradient(135deg,#000 0%,#0008 38%,transparent 78%); }
 
 .botanical-pointer-flower { display: grid; place-items: center; }
+
+/* Keep scroll position discoverable without a heavy native track. */
+html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scrollbar-color: #87a89d transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #87a89d; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #42796a; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+@media (forced-colors: active) { html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-color: auto; } }

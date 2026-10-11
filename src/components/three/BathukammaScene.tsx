@@ -20,15 +20,17 @@ const stages={
  daylight:{background:"#F4F7F5",key:"#FFFDF5",fill:"#E5F1FF",rim:"#FFFFFF",ambient:.2,hemisphere:.55,keyPower:1.6,fillPower:.7,rimPower:.5,environment:.2},
  evening:{background:"#162B29",key:"#FFE0AE",fill:"#A8C9E5",rim:"#FFE9BD",ambient:.1,hemisphere:.25,keyPower:2.2,fillPower:.3,rimPower:1.2,environment:.1},
 } as const;
+// Hero lighting retains directional highlights even in the lightweight mobile renderer.
+const heroLighting={...stages.studio,ambient:.08,hemisphere:.28,keyPower:2.5,fillPower:.55,rimPower:1.15,environment:.2};
 type Props={stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
 export default function BathukammaScene(props:Props) {
   // Canvas fallback is ordinary canvas child content, mounted even when WebGL
   // works. Only renderer errors/context loss should activate the 2D fallback.
-  return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:.92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
+  return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:props.storyProgress ? 1 : .92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
 }
 function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
   const {camera,gl,invalidate,size,scene}=useThree();
-  const lighting=stages[stage];
+  const lighting=storyProgress ? heroLighting : stages[stage];
   // Bake the studio reflections once per renderer, not per flower or frame.
   useEffect(()=>{
     const room=new RoomEnvironment(),generator=new THREE.PMREMGenerator(gl);
@@ -141,7 +143,7 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
     <directionalLight position={[4,2.5,3]} intensity={lighting.fillPower} color={lighting.fill}/>
     <directionalLight position={[1.5,4,-4]} intensity={lighting.rimPower} color={lighting.rim}/>
     <group ref={storyGroup}>
-    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={.78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
+    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={storyProgress ? .64 : .78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
     <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
     <mesh position={[0,-.01,0]} receiveShadow><cylinderGeometry args={[1.88,1.83,.065,96]}/><meshStandardMaterial color="#B69A60" metalness={.72} roughness={.32} envMapIntensity={.35}/></mesh>
     <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D5B979" metalness={.78} roughness={.28} envMapIntensity={.4}/></mesh>

@@ -1,4 +1,4 @@
-.language-toggle{min-height:36px;padding:6px 10px;border:1px solid var(--border,#cdd8da);border-radius:6px;background:transparent;color:var(--ink,#173738);font:600 13px var(--sans);cursor:pointer;white-space:nowrap}.language-toggle:hover{background:rgba(27,80,73,.07)}.language-toggle:focus-visible{outline:2px solid #217a6b;outline-offset:3px}html[data-language=te]{--sans:"Noto Sans Telugu",sans-serif;--serif:"Noto Sans Telugu",sans-serif}html[data-language=te] h1,html[data-language=te] h2,html[data-language=te] h3{line-height:1.5;letter-spacing:0}html[data-language=te] .eyebrow{letter-spacing:0;text-transform:none}html[data-language=te] button{line-height:1.5}@media(max-width:600px){.site-header nav{flex-wrap:wrap;gap:8px}.language-toggle{padding:5px 8px}}
+.language-toggle{min-height:36px;padding:6px 10px;border:1px solid var(--border,#cdd8da);border-radius:6px;background:transparent;color:var(--ink,#173738);font:600 13px var(--sans);cursor:pointer;white-space:nowrap}.language-toggle:hover{background:rgba(27,80,73,.07)}.language-toggle:focus-visible{outline:2px solid #217a6b;outline-offset:3px}html[data-language=te]{--sans:"Mallanna","Noto Sans Telugu",sans-serif;--serif:"Mallanna","Noto Sans Telugu",sans-serif}html[data-language=te] h1,html[data-language=te] h2,html[data-language=te] h3{line-height:1.5;letter-spacing:0}html[data-language=te] .eyebrow{letter-spacing:0;text-transform:none}html[data-language=te] button{line-height:1.5}@media(max-width:600px){.site-header nav{flex-wrap:wrap;gap:8px}.language-toggle{padding:5px 8px}}
 
 html[data-language=te][data-telugu-font=gidugu]{--serif:"Gidugu","Noto Sans Telugu",sans-serif;--sans:"Gidugu","Noto Sans Telugu",sans-serif}
 html[data-language=te][data-telugu-font=lohit]{--serif:"Lohit Telugu","Noto Sans Telugu",sans-serif;--sans:"Lohit Telugu","Noto Sans Telugu",sans-serif}
@@ -8,3 +8,6 @@ html[data-language=te][data-telugu-font=chathura]{--serif:"Chathura","Noto Sans 
 html[data-language=te][data-telugu-font=ravi]{--serif:"RaviPrakash","Noto Sans Telugu",sans-serif;--sans:"RaviPrakash","Noto Sans Telugu",sans-serif}
 html[data-language=te][data-telugu-font=lakki]{--serif:"LakkiReddy","Noto Sans Telugu",sans-serif;--sans:"LakkiReddy","Noto Sans Telugu",sans-serif}
 html[data-language=te] [lang=te]{font-family:var(--sans)}
+
+/* Selected Telugu identity, including names shown within the English interface. */
+[lang=te] { font-family: "Mallanna", "Noto Sans Telugu", sans-serif; font-weight: 400; }

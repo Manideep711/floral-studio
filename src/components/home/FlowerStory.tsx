@@ -8,6 +8,7 @@ import {guidedDesign,GUIDED_KEY} from "@/lib/design/guided";
 import {templates,templateDesign} from "@/lib/design/templates";
 import type {Design} from "@/lib/design/schema";
 import ArrangementCanvas from "../studio/ArrangementCanvas";
+import {GridPattern} from "../ui/grid-pattern";
 import {TextAnimate} from "../ui/text-animate";
 import Icon from "../ui/Icon";
 import {useStoryGate} from "./useStoryGate";
@@ -80,6 +81,7 @@ export default function FlowerStory(){
   };
   const fallback=<ArrangementCanvas design={design} selected="" onSelect={nothing} profile/>;
   return <div ref={root} className="flower-story" data-guided-step={step}>
+    <GridPattern className="story-grid" width={40} height={40}/>
     <div className="story-copy">
       <section className="story-intro" aria-labelledby="home-title"><p className="eyebrow"><TextAnimate as="span" variants={headingEntrance} by="text" startOnView={false} delay={heroDelay} key={`${locale}-eyebrow`}>{tr("Bathukamma")}</TextAnimate></p><h1 id="home-title"><TextAnimate as="span" variants={headingEntrance} by="text" startOnView={false} delay={heroDelay} duration={.1} key={`${locale}-intro`}>{tr("Make a")}</TextAnimate><br/><em><TextAnimate as="span" variants={headingEntrance} by="text" startOnView={false} delay={heroDelay+.12} duration={.1} key={`${locale}-title`}>{tr("Bathukamma.")}</TextAnimate></em></h1><p className="hero-description"><TextAnimate as="span" variants={wordEntrance} by="word" startOnView={false} delay={heroDelay+.22} duration={.48} key={`${locale}-description`}>{tr("Choose flowers. Build one layer at a time.")}</TextAnimate></p><a href="#story-layer-1" className="primary-button"><Icon name="flower" size={18}/><TextAnimate as="span" variants={wordEntrance} by="word" startOnView={false} delay={heroDelay+.42} duration={.24} key={`${locale}-cta`}>{tr("Start arranging")}</TextAnimate> <Icon name="arrow" size={18}/></a><p className="hero-meta"><TextAnimate as="span" variants={wordEntrance} by="word" startOnView={false} delay={heroDelay+.58} duration={.24} key={`${locale}-meta`}>{tr("No sign-in needed.")}</TextAnimate></p><div className="hero-signature"><span lang="te"><TextAnimate as="span" variants={headingEntrance} by="text" startOnView={false} delay={heroDelay+.6}>బతుకమ్మ</TextAnimate></span><span><TextAnimate as="span" variants={wordEntrance} by="word" startOnView={false} delay={heroDelay+.66} duration={.24} key={`${locale}-festival`}>{tr("Telangana’s flower festival")}</TextAnimate></span></div></section>
       {chapters.map((chapter,i)=><motion.section initial={reduced ? false : "hidden"} whileInView={i<=step ? "visible" : "hidden"} viewport={{once:true,amount:.3}} variants={{hidden:{opacity:0,x:i%2===0 ? 32 : -32,filter:"blur(4px)"},visible:{opacity:1,x:0,filter:"blur(0px)",transitionEnd:{filter:"none",transform:"none"}}}} transition={{duration:reduced ? 0 : .5,ease:[.22,1,.36,1]}} key={chapter.title} tabIndex={-1} inert={i>step} aria-hidden={i>step} id={`story-layer-${i+1}`} ref={el=>{chapterRefs.current[i]=el;}} className={`story-chapter ${step===i ? "current" : ""}`} aria-labelledby={`chapter-${i}`}>
