@@ -1,3 +1,4 @@
+import UsageTracker from "@/components/admin/UsageTracker";
 import PageEdgeBlur from "@/components/ui/PageEdgeBlur";
 import localFont from "next/font/local";
 import {TooltipProvider} from "@/components/ui/tooltip";
@@ -20,5 +21,5 @@ const editorial = localFont({src:[{path:"../../public/fonts/lora-400.ttf",weight
 const interfaceFont = localFont({src:[{path:"../../public/fonts/poppins-400.woff2",weight:"400",style:"normal"},{path:"../../public/fonts/poppins-500.woff2",weight:"500",style:"normal"},{path:"../../public/fonts/poppins-600.woff2",weight:"600",style:"normal"},{path:"../../public/fonts/poppins-700.woff2",weight:"700",style:"normal"}],variable:"--font-interface",display:"swap"});
 export const metadata:Metadata={icons:{icon:[{url:"/brand/logo.svg",type:"image/svg+xml"},{url:"/brand/icon-32.png",sizes:"32x32",type:"image/png"}],apple:"/brand/apple-touch-icon.png"},title:"Bathukamma — Your digital flower studio",description:"Layer by layer, create your own digital Bathukamma. An original botanical flower studio celebrating Telangana."};
 export default function RootLayout({children}:Readonly<{children:React.ReactNode}>) {
-  return <html lang="en" className={`${editorial.variable} ${interfaceFont.variable}`}><body><LanguageProvider><SkipLink/><TooltipProvider><PageMotion>{children}</PageMotion></TooltipProvider><PageEdgeBlur/></LanguageProvider><noscript><style>{".brand-loader{display:none!important}.page-motion,.premium-reveal,.blur-fade{opacity:1!important;filter:none!important;transform:none!important}"}</style></noscript></body></html>;
+  return <html lang="en" className={`${editorial.variable} ${interfaceFont.variable}`}><body><LanguageProvider><UsageTracker/><SkipLink/><TooltipProvider><PageMotion>{children}</PageMotion></TooltipProvider><PageEdgeBlur/></LanguageProvider><noscript><style>{".brand-loader{display:none!important}.page-motion,.premium-reveal,.blur-fade{opacity:1!important;filter:none!important;transform:none!important}"}</style></noscript></body></html>;
 }

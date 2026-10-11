@@ -1,30 +1,30 @@
 "use client";
 import {useRef,useState} from "react";
-import {flushSync} from "react-dom";
+import {flushSync,createPortal} from "react-dom";
 import {useLanguage} from "@/lib/i18n/LanguageProvider";
-// Magic UI Theme Toggler circular reveal adapted to language switching.
 export default function LanguageToggle(){
  const {locale,setLocale}=useLanguage();
- const button=useRef<HTMLButtonElement>(null),busy=useRef(false);
+ const button=useRef<HTMLButtonElement>(null),overlay=useRef<HTMLDivElement>(null),busy=useRef(false);
  const [pending,setPending]=useState(false);
  async function toggle(){
   if(busy.current)return;
   const next=locale==="en"?"te":"en";
-  if(!document.startViewTransition||matchMedia("(prefers-reduced-motion: reduce)").matches){setLocale(next);return;}
-  busy.current=true;setPending(true);
-  const root=document.documentElement,rect=button.current!.getBoundingClientRect();
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){setLocale(next);return;}
+  busy.current=true;
+  const rect=button.current!.getBoundingClientRect();
   const x=rect.left+rect.width/2,y=rect.top+rect.height/2,w=innerWidth,h=innerHeight;
   const radius=Math.hypot(Math.max(x,w-x),Math.max(y,h-y));
-  root.dataset.languageTransition="active";
+  flushSync(()=>setPending(true));
+  const veil=overlay.current!;
   try{
-   const transition=document.startViewTransition(()=>flushSync(()=>setLocale(next)));
-   await transition.ready;
-   const animation=root.animate({clipPath:[`circle(0% at ${x/w*100}% ${y/h*100}%)`,`circle(${radius/(Math.hypot(w,h)/Math.SQRT2)*100}% at ${x/w*100}% ${y/h*100}%)`]},{duration:500,easing:"ease-in-out",pseudoElement:"::view-transition-new(root)",fill:"forwards"});
-   await animation.finished;
-   animation.cancel();
-   await transition.finished;
+   const spread=veil.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${radius}px at ${x}px ${y}px)`]},{duration:450,easing:"cubic-bezier(.65,0,.35,1)",fill:"forwards"});
+   await spread.finished;
+   flushSync(()=>setLocale(next));
+   const fade=veil.animate({opacity:[1,0]},{duration:350,easing:"ease-out",fill:"forwards"});
+   await fade.finished;
+   spread.cancel();fade.cancel();
   }catch{setLocale(next);}
-  finally{delete root.dataset.languageTransition;busy.current=false;setPending(false);}
+  finally{busy.current=false;setPending(false);}
  }
- return <button ref={button} type="button" className="language-toggle" disabled={pending} aria-busy={pending} aria-label={locale==="en"?"తెలుగులోకి మార్చండి":"Switch to English"} onClick={toggle}><span lang="en">EN</span><span aria-hidden="true"> / </span><span lang="te">తెలుగు</span></button>;
+ return <><button ref={button} type="button" className="language-toggle" disabled={pending} aria-busy={pending} aria-label={locale==="en"?"తెలుగులోకి మార్చండి":"Switch to English"} onClick={toggle}><span lang={locale}>{locale==="en"?"EN":"తె"}</span></button>{pending&&createPortal(<div ref={overlay} aria-hidden="true" className="language-transition-veil"/>,document.body)}</>;
 }

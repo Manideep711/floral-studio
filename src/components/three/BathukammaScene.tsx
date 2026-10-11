@@ -15,6 +15,7 @@ import type {MotionValue} from "motion/react";
 export type SceneCommand={type:"replay"|"skip"|"reset"|"left"|"right"|"in"|"out";id:number};
 export type SceneMetrics={flowers:number;drawCalls:number;triangles:number;revealFps:number};
 export type StageStyle="studio"|"daylight"|"evening";
+import {DEFAULT_STUDIO_SETTINGS,type StudioSettings} from "@/lib/three/staging";
 const stages={
  studio:{background:"#FAFBFB",key:"#FFF3E4",fill:"#E8F0FF",rim:"#FFF8EC",ambient:.12,hemisphere:.35,keyPower:1.9,fillPower:.4,rimPower:.75,environment:.14},
  daylight:{background:"#F4F7F5",key:"#FFFDF5",fill:"#E5F1FF",rim:"#FFFFFF",ambient:.2,hemisphere:.55,keyPower:1.6,fillPower:.7,rimPower:.5,environment:.2},
@@ -22,15 +23,16 @@ const stages={
 } as const;
 // Hero lighting retains directional highlights even in the lightweight mobile renderer.
 const heroLighting={...stages.studio,ambient:.08,hemisphere:.28,keyPower:2.5,fillPower:.55,rimPower:1.15,environment:.2};
-type Props={stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
+type Props={settings?:StudioSettings;stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
 export default function BathukammaScene(props:Props) {
   // Canvas fallback is ordinary canvas child content, mounted even when WebGL
   // works. Only renderer errors/context loss should activate the 2D fallback.
   return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:props.storyProgress ? 1 : .92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
 }
-function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
+function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
   const {camera,gl,invalidate,size,scene}=useThree();
-  const lighting=storyProgress ? heroLighting : stages[stage];
+  const lighting=useMemo(()=>{if(storyProgress)return heroLighting;const base=stages[stage];return {...base,keyPower:base.keyPower*settings.key,fillPower:base.fillPower*settings.fill,rimPower:base.rimPower*settings.rim,ambient:base.ambient*settings.ambient,environment:base.environment*settings.environment};},[storyProgress,stage,settings]);
+  useEffect(()=>{if(storyProgress)return;gl.toneMappingExposure=settings.exposure;if(camera instanceof THREE.PerspectiveCamera){camera.fov=settings.fov;camera.updateProjectionMatrix();}invalidate();},[settings.exposure,settings.fov,storyProgress,camera,gl,invalidate]);
   // Bake the studio reflections once per renderer, not per flower or frame.
   useEffect(()=>{
     const room=new RoomEnvironment(),generator=new THREE.PMREMGenerator(gl);
@@ -56,7 +58,7 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
       const floor=scene.getObjectByName("studio-floor"),floorVisible=floor?.visible;
       const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const context=canvas.getContext("2d");if(!context)throw new Error("Capture unavailable");
       try{scene.background=null;if(floor)floor.visible=false;gl.setClearColor(0x000000,0);gl.setPixelRatio(1);gl.setSize(w,h,false);
-        const photo=new THREE.PerspectiveCamera(38,w/h,.1,40);photo.position.set(3.1,3.4+height*.35,4.4);photo.lookAt(0,height*.4,0);gl.render(scene,photo);context.drawImage(gl.domElement,0,0,w,h);
+        const photo=(camera as THREE.PerspectiveCamera).clone();photo.aspect=w/h;photo.updateProjectionMatrix();gl.render(scene,photo);context.drawImage(gl.domElement,0,0,w,h);
       }finally{scene.background=background;if(floor)floor.visible=floorVisible!;gl.setClearColor(clear,alpha);gl.setPixelRatio(ratio);gl.setSize(oldSize.x,oldSize.y,false);gl.render(scene,camera);invalidate();}
       return new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob ? resolve(blob) : reject(new Error("Capture failed")),"image/png"));
     };
