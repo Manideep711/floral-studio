@@ -1,3 +1,5 @@
+import FlowerPointer from "@/components/ui/pointer";
+import {ProgressiveBlur} from "@/components/ui/progressive-blur";
 import localFont from "next/font/local";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import PageMotion from "@/components/ui/PageMotion";
@@ -18,5 +20,5 @@ const editorial = localFont({src:[{path:"../../public/fonts/fraunces.woff2",styl
 const interfaceFont = localFont({src:"../../public/fonts/manrope.woff2",variable:"--font-interface",weight:"200 800",display:"swap"});
 export const metadata:Metadata={icons:{icon:[{url:"/brand/logo.svg",type:"image/svg+xml"},{url:"/brand/icon-32.png",sizes:"32x32",type:"image/png"}],apple:"/brand/apple-touch-icon.png"},title:"Bathukamma — Your digital flower studio",description:"Layer by layer, create your own digital Bathukamma. An original botanical flower studio celebrating Telangana."};
 export default function RootLayout({children}:Readonly<{children:React.ReactNode}>) {
-  return <html lang="en" className={`${editorial.variable} ${interfaceFont.variable}`}><body><LanguageProvider><SkipLink/><TooltipProvider><PageMotion>{children}</PageMotion></TooltipProvider><TypographyController/></LanguageProvider><noscript><style>{".brand-loader{display:none!important}.page-motion,.premium-reveal{opacity:1!important;filter:none!important;transform:none!important}"}</style></noscript></body></html>;
+  return <html lang="en" className={`${editorial.variable} ${interfaceFont.variable}`}><body><LanguageProvider><SkipLink/><TooltipProvider><PageMotion>{children}</PageMotion></TooltipProvider><ProgressiveBlur className="page-edge-blur"/><TypographyController/><FlowerPointer/></LanguageProvider><noscript><style>{".brand-loader{display:none!important}.page-motion,.premium-reveal,.blur-fade{opacity:1!important;filter:none!important;transform:none!important}"}</style></noscript></body></html>;
 }

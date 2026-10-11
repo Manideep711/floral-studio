@@ -1,4 +1,5 @@
 "use client";
+import EditorEntrance from "./EditorEntrance";
 import ViewerLoading from "../ui/ViewerLoading";
 import {useLanguage} from "@/lib/i18n/LanguageProvider";
 import SiteHeader from "../ui/SiteHeader";
@@ -126,7 +127,7 @@ export default function Studio() {
   if(blooming) return <BloomViewer design={design} onBack={()=>setBlooming(false)}/>;
   return <div className="studio-page">
     <SiteHeader active="studio"><button className="text-button about-button" aria-label={tr("About the flowers")} onClick={()=>setDialog("about")}><span>{tr("About the flowers")}</span><Icon name="info" size={18}/></button></SiteHeader>
-    <main id="main-content" tabIndex={-1}>
+    <EditorEntrance><main id="main-content" tabIndex={-1}>
       <div className="studio-heading"><div><p className="eyebrow">{tr("Create")}</p><h1>{tr("Studio")}</h1><p>{tr("Choose a layer to edit.")}</p></div><div className={`draft-status ${/could|paused/i.test(saveState) ? "save-warning" : ""}`} role="status"><span className="status-dot"/>{tr(saveState)}</div></div>
       {draftError && <div className="draft-error" role="alert">{tr("Draft unavailable. Saving is paused.")}<button className="text-button" onClick={recoverDraft}>{tr("Download previous draft")}</button><button className="text-button" onClick={()=>{setSaveEnabled(true);setDraftError(false);}}>{tr("Replace with this design")}</button></div>}
       <section className="template-launcher" aria-labelledby="template-launcher-title"><div className="template-launcher-copy"><p className="eyebrow">{tr("Templates")}</p><h2 id="template-launcher-title">{tr("Pick a starting point")}</h2><p>{tr("24 templates, ready to edit.")}</p><Button disabled={!ready} onClick={()=>openTemplates()}>{tr("See templates")} <Icon name="arrow" size={16}/></Button></div><div className="template-starters" role="group" aria-label={tr("See templates by size")}>{templates.slice(0,4).map(t=><button key={t.id} disabled={!ready} onClick={()=>openTemplates(t.size)} aria-label={`${tr("Templates")} · ${tr(t.name)}`}><img src={`/templates/${t.id}-original.webp`} width="144" height="96" alt="" decoding="async"/><span><strong>{tr(t.name)}</strong><small>{tr(`${t.layers} layers`)}{t.size==="large" ? tr(" · wider") : ""}</small></span></button>)}</div></section>
@@ -150,7 +151,7 @@ export default function Studio() {
       </div>
 
       <p className="notice" role="status" aria-live="polite">{tr(notice)}</p>
-    </main><SiteFooter/>
+    </main></EditorEntrance><SiteFooter/>
     {dialog && <StudioDialog type={dialog} onClose={()=>setDialog(null)} onReset={()=>{change(defaultDesign());setSelected("layer-base");setDialog(null);setNotice("Starter arrangement restored. Undo can bring back your previous design.");}}/>}
     {templatesOpen && <TemplatePicker initialSize={templateSize} onClose={()=>setTemplatesOpen(false)} onChoose={(id,height)=>{const next={...templateDesign(id,height),personalization:{...design.personalization}};change(next);setSelected(next.layers[0].id);setTemplatesOpen(false);setNotice("Template applied. Undo restores your previous arrangement.");}}/>}
   </div>;

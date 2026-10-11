@@ -1,97 +1,14 @@
-// Adapted from Magic UI, MIT. Reduced-motion support added; see docs/component-sources.md.
-"use client"
-
-import { useRef } from "react"
-import {
-  AnimatePresence,
-  motion,
-  useInView,
-  useReducedMotion,
-  type MotionProps,
-  type UseInViewOptions,
-  type Variants,
-} from "motion/react"
-
-type MarginType = UseInViewOptions["margin"]
-
-interface BlurFadeProps extends MotionProps {
-  children: React.ReactNode
-  className?: string
-  variant?: {
-    hidden: { y: number }
-    visible: { y: number }
-  }
-  duration?: number
-  delay?: number
-  offset?: number
-  direction?: "up" | "down" | "left" | "right"
-  inView?: boolean
-  inViewMargin?: MarginType
-  blur?: string
-}
-
-const getFilter = (v: Variants[string]) =>
-  typeof v === "function" ? undefined : v.filter
-
-export function BlurFade({
-  children,
-  className,
-  variant,
-  duration = 0.4,
-  delay = 0,
-  offset = 6,
-  direction = "down",
-  inView = false,
-  inViewMargin = "-50px",
-  blur = "6px",
-  ...props
-}: BlurFadeProps) {
-  const reduced = useReducedMotion()
-  const ref = useRef(null)
-  const inViewResult = useInView(ref, { once: true, margin: inViewMargin })
-  const isInView = !inView || inViewResult
-  const defaultVariants: Variants = {
-    hidden: {
-      [direction === "left" || direction === "right" ? "x" : "y"]:
-        direction === "right" || direction === "down" ? -offset : offset,
-      opacity: 0,
-      filter: `blur(${blur})`,
-    },
-    visible: {
-      [direction === "left" || direction === "right" ? "x" : "y"]: 0,
-      opacity: 1,
-      filter: `blur(0px)`,
-    },
-  }
-  const combinedVariants = variant ?? defaultVariants
-
-  const hiddenFilter = getFilter(combinedVariants.hidden)
-  const visibleFilter = getFilter(combinedVariants.visible)
-
-  const shouldTransitionFilter =
-    hiddenFilter != null &&
-    visibleFilter != null &&
-    hiddenFilter !== visibleFilter
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        ref={ref}
-        initial={reduced ? false : "hidden"}
-        animate={reduced || isInView ? "visible" : "hidden"}
-        exit="hidden"
-        variants={combinedVariants}
-        transition={{
-          delay: reduced ? 0 : 0.04 + delay,
-          duration: reduced ? 0 : duration,
-          ease: "easeOut",
-          ...(shouldTransitionFilter ? { filter: { duration } } : {}),
-        }}
-        className={`premium-reveal ${className ?? ""}`}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
-  )
+"use client";
+import {useEffect,useState,useRef,type ReactNode} from "react";
+import {motion,useInView,useReducedMotion,type MotionProps,type UseInViewOptions,type Variants} from "motion/react";
+// Magic UI Blur Fade, adapted for reduced motion and sticky editor positioning.
+interface BlurFadeProps extends MotionProps{children:ReactNode;className?:string;variant?:Variants;duration?:number;delay?:number;offset?:number;direction?:"up"|"down"|"left"|"right";inView?:boolean;inViewMargin?:UseInViewOptions["margin"];blur?:string;waitForLoader?:boolean}
+export function BlurFade({children,className="",variant,duration=.4,delay=0,offset=6,direction="down",inView=false,inViewMargin="-50px",blur="6px",waitForLoader=false,...props}:BlurFadeProps){
+ const ref=useRef<HTMLDivElement>(null),visible=useInView(ref,{once:true,margin:inViewMargin}),reduced=useReducedMotion();
+ const [loaderCleared,setLoaderCleared]=useState(!waitForLoader);
+ useEffect(()=>{if(!waitForLoader)return;const check=()=>{if(!document.querySelector(".brand-loader")){setLoaderCleared(true);observer.disconnect();}};const observer=new MutationObserver(check);observer.observe(document.body,{childList:true,subtree:true});check();return ()=>observer.disconnect();},[waitForLoader]);
+ const axis=direction==="left"||direction==="right"?"x":"y";
+ const shift=direction==="right"||direction==="down"?-offset:offset;
+ const variants:Variants=variant??{hidden:{x:axis==="x"?shift:0,y:axis==="y"?shift:0,opacity:0,filter:`blur(${blur})`},visible:{x:0,y:0,opacity:1,filter:"blur(0px)",transitionEnd:{filter:"none",transform:"none"}}};
+ return <motion.div {...props} ref={ref} className={`blur-fade ${className}`} initial={reduced?false:"hidden"} animate={reduced?{opacity:1,filter:"none",transform:"none"}:loaderCleared&&(!inView||visible)?"visible":"hidden"} variants={variants} transition={{duration:reduced?0:duration,delay:reduced?0:delay+.04,ease:"easeOut"}}>{children}</motion.div>;
 }

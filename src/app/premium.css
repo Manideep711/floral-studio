@@ -40,7 +40,7 @@ body { font-size: 14px; }
 .ui-tabs-trigger[data-state=active] { color: var(--ink); background: var(--surface); box-shadow: 0 1px 4px #243b3012; font-weight: 650; }
 .ui-tabs-content { min-height: 290px; }
 .ui-tabs-content[data-state=active] { animation: panel-appear 160ms ease-out; }
-@keyframes panel-appear { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes panel-appear { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: none; filter: none; } }
 .tab-dot { width: 4px; height: 4px; background: var(--green); border-radius: 50%; }
 .ui-tabs-content .accent-controls { border: 0; margin: 0; padding: 0; }
 .ui-slider { position: relative; display: flex; align-items: center; width: 100%; min-height: 40px; touch-action: none; user-select: none; }
@@ -529,3 +529,53 @@ body{background:#fff}
 .lighting-options{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 16px;padding:4px;width:fit-content;background:#eef3f2;border-radius:8px}.lighting-options button{padding:10px 18px;border:0;border-radius:5px;background:transparent;color:var(--ink);font-size:14px;transition:background .2s,color .2s}.lighting-options button[aria-pressed=true]{background:var(--green);color:white}.lighting-options button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
 
 .bloom-stage[data-lighting=evening] .reveal-status,.bloom-stage[data-lighting=evening] .orbit-hint{color:#e2ece7}.bloom-stage[data-lighting=evening] .status-dot{background:#c8dccc}
+
+
+@media (any-hover:hover) and (any-pointer:fine) and (prefers-reduced-motion:no-preference){[data-custom-pointer=active],[data-custom-pointer=active] *{cursor:none!important}}
+.botanical-pointer{width:32px;height:32px;display:grid;place-items:center;background:#fff;border:1px solid #c9a557;border-radius:50%;color:var(--green);box-shadow:0 2px 8px #173b3320}
+
+
+.progressive-blur{position:absolute;left:0;right:0;pointer-events:none;user-select:none;z-index:20}.progressive-blur-top{top:0}.progressive-blur-bottom{bottom:0}
+.page-edge-blur{position:fixed;height:64px!important}
+body:has(dialog[open]) .page-edge-blur,body:has(:focus-visible) .page-edge-blur{visibility:hidden}
+@media(max-width:700px){.page-edge-blur{height:36px!important}.page-edge-blur>div:nth-child(3){backdrop-filter:blur(2px)!important;-webkit-backdrop-filter:blur(2px)!important}.page-edge-blur>div:nth-child(4){backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}}
+@media(prefers-reduced-motion:reduce){.page-edge-blur{display:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.page-edge-blur{display:none}}
+
+/* Directional editor entrance: templates down, layers right, controls left, preview up. */
+.editor-entrance .studio-heading,
+.editor-entrance .template-launcher,
+.editor-entrance .studio-layout { animation: none; }
+@media (prefers-reduced-motion: no-preference) {
+ .editor-entrance .template-launcher { --editor-x: 0px; --editor-y: -24px; }
+ .editor-entrance .layers-panel { --editor-x: -28px; --editor-y: 0px; }
+ .editor-entrance .control-panel { --editor-x: 28px; --editor-y: 0px; }
+ .editor-entrance .canvas-panel { --editor-x: 0px; --editor-y: 30px; }
+ .editor-entrance[data-ready="false"] :is(.template-launcher,.layers-panel,.control-panel,.canvas-panel) { opacity: 0; }
+ .editor-entrance[data-ready="true"] :is(.template-launcher,.layers-panel,.control-panel,.canvas-panel) {
+  animation: editor-panel-enter 500ms cubic-bezier(.22,1,.36,1) both;
+ }
+ .editor-entrance[data-ready="true"] .layers-panel { animation-delay: 80ms; }
+ .editor-entrance[data-ready="true"] .canvas-panel { animation-delay: 140ms; }
+ .editor-entrance[data-ready="true"] .control-panel { animation-delay: 200ms; }
+ @keyframes editor-panel-enter {
+  from { opacity: 0; transform: translate(var(--editor-x),var(--editor-y)); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+ }
+}
+
+/* Static story dots: one painted pattern, no per-dot animation or resize work. */
+.flower-story { isolation: isolate; }
+.flower-story::before {
+ content: "";
+ position: absolute;
+ inset: 0;
+ z-index: -1;
+ pointer-events: none;
+ background-image: radial-gradient(circle, rgba(38,88,77,.19) .85px, transparent 1px);
+ background-size: 24px 24px;
+ mask-image: linear-gradient(to right,transparent,#000 12%,#000 88%,transparent);
+ -webkit-mask-image: linear-gradient(to right,transparent,#000 12%,#000 88%,transparent);
+}
+
+.botanical-pointer-flower { display: grid; place-items: center; }
