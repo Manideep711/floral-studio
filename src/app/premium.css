@@ -445,7 +445,6 @@ body { font-size: 14px; }
 .story-intro>.hero-description { animation-delay: 120ms; }
 .story-intro>.primary-button,.story-intro>.story-skip { animation-delay: 180ms; }
 .story-intro>.hero-meta,.story-intro>.hero-signature { animation-delay: 220ms; }
-.story-finish:not([inert]) { animation: product-enter 500ms cubic-bezier(.22,1,.36,1) both; }
 .studio-dialog:not(.template-dialog)[open] .dialog-inner { animation: product-enter 220ms cubic-bezier(.22,1,.36,1); }
 .studio-explainer[open] ol,.botanical-note[open]>p,.backup-menu[open] .backup-actions { animation: product-enter 200ms ease-out; }
 .site-header nav a { position: relative; }
