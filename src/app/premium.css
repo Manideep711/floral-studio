@@ -739,3 +739,9 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
  .studio-page .bloom-next { position:fixed; left:16px; right:16px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:40; padding:6px; border:1px solid #dce7e1; border-radius:16px; background:#ffffffef; box-shadow:0 8px 28px #173b3324; backdrop-filter:blur(8px); }
  .studio-page .studio-bottom .bloom-next .shiny-button { width:100%; min-height:48px; font-size:14px; border-radius:11px; }
 }
+@media(max-width:700px) {
+ .studio-page .studio-bottom { position:fixed; top:auto; bottom:0; left:0; right:0; z-index:40; display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0; padding:12px 20px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid #dce7e1; border-bottom:0; background:#fffffff5; box-shadow:0 -4px 16px #173b3308; }
+ .studio-page .studio-bottom .bloom-next { position:static; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; }
+ .studio-page .studio-bottom .bloom-next .shiny-button { width:auto; min-height:48px; padding:12px 18px; }
+ .studio-page .studio-bottom .backup-menu { min-width:0; }
+}
