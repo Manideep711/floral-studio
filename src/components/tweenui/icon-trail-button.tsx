@@ -9,6 +9,7 @@ import {
   useState,
   type ComponentPropsWithoutRef,
   type Ref,
+  type MouseEvent,
 } from 'react';
 import { cn } from '@/lib/utils';
 import LogoMark from '../ui/LogoMark';
@@ -101,7 +102,13 @@ function useButtonIconSlide() {
       dirRef.current = 'out';
     };
 
-    const sync = () => step();
+    const sync = () => { if(!canHover() && timerRef.current!==null) return; step(); };
+    const tap = (event: PointerEvent) => {
+      if(event.pointerType === "mouse" || btn.matches("[disabled]")) return;
+      clearTimer(); setState("park");
+      wait(1100, () => setState("idle"));
+    };
+    btn.addEventListener("pointerdown", tap);
     btn.addEventListener('pointerenter', sync);
     btn.addEventListener('pointerleave', sync);
     btn.addEventListener('focus', sync);
@@ -109,6 +116,7 @@ function useButtonIconSlide() {
 
     return () => {
       clearTimer();
+      btn.removeEventListener('pointerdown', tap);
       btn.removeEventListener('pointerenter', sync);
       btn.removeEventListener('pointerleave', sync);
       btn.removeEventListener('focus', sync);
@@ -136,6 +144,9 @@ export default function IconTrailButton({
   ...props
 }: IconTrailButtonProps) {
   const { iconState, buttonRef } = useButtonIconSlide();
+  const navigationTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const replayClick=useRef(false);
+  useEffect(()=>()=>{if(navigationTimer.current)clearTimeout(navigationTimer.current);},[]);
   const isLink = typeof props.href === 'string';
   const Tag = isLink ? 'a' : 'button';
   const tagProps = isLink
@@ -146,6 +157,17 @@ export default function IconTrailButton({
     <Tag
       {...(tagProps as ComponentPropsWithoutRef<'button'> & ComponentPropsWithoutRef<'a'>)}
       ref={buttonRef as Ref<HTMLButtonElement & HTMLAnchorElement>}
+      onClick={(event: MouseEvent<HTMLButtonElement & HTMLAnchorElement>)=>{
+        const touchLink=isLink && !canHover() && props.href?.startsWith("#") && !prefersReducedMotion();
+        if(touchLink && !replayClick.current){
+          event.preventDefault();
+          if(navigationTimer.current)clearTimeout(navigationTimer.current);
+          const target=event.currentTarget;
+          navigationTimer.current=setTimeout(()=>{replayClick.current=true;target.click();replayClick.current=false;},650);
+          return;
+        }
+        props.onClick?.(event);
+      }}
       data-btn-icon-slide
       data-icon-state={iconState}
       className={cn(

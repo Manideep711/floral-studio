@@ -681,3 +681,17 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
 .button-ripple { position:absolute; border-radius:50%; transform:scale(0); animation:button-rippling var(--ripple-duration,600ms) ease-out forwards; }
 @keyframes button-rippling { from {transform:scale(0);opacity:.3;} to {transform:scale(1);opacity:0;} }
 @media(prefers-reduced-motion:reduce) { .button-ripple { display:none; } .shiny-button { transition:none; } }
+@media(max-width:700px) {
+ .story-intro .story-trail-cta { width:max-content; max-width:none; height:44px; min-height:44px; }
+ .story-trail-cta .logo-trail-label { flex-shrink:0; font-size:13px; margin-left:48px; margin-right:10px; white-space:nowrap; }
+ .story-trail-cta .logo-trail-label .text-animate { white-space:nowrap; }
+ .story-trail-cta .logo-trail-icon { width:40px; }
+ .story-trail-cta:not([data-icon-state=idle]) .logo-trail-icon { left:calc(100% - 44px); }
+ .story-trail-cta:not([data-icon-state=idle]) .logo-trail-label { margin-left:10px; margin-right:48px; }
+ .studio-page .studio-bottom { position:relative; inset:auto; z-index:4; padding:12px 0; margin:0 0 20px; border-top:0; border-bottom:1px solid var(--line); }
+ .studio-page .studio-bottom .shiny-button { min-height:44px; padding:10px 14px; font-size:13px; }
+}
+@media(hover:none) and (prefers-reduced-motion:no-preference) {
+ .template-option:active .template-preview img,.template-starters button:active img { transform:scale(1.04); }
+ .flower-option:active { transform:scale(.98); }
+}
