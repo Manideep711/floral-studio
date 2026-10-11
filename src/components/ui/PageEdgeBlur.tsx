@@ -20,5 +20,5 @@ export default function PageEdgeBlur(){
   window.addEventListener("scroll",schedule,{passive:true});window.addEventListener("resize",schedule);schedule();
   return ()=>{cancelAnimationFrame(frame);observer.disconnect();mutations.disconnect();window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);};
  },[path]);
- return <div ref={host}><ProgressiveBlur className="page-edge-blur"/></div>;
+ return <div ref={host}><ProgressiveBlur className="page-edge-blur" blurLevels={[1,4]}/></div>;
 }

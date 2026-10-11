@@ -902,3 +902,43 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
 }
 
 .card-export-status{font-size:11px;line-height:1.4;color:var(--muted);margin:0;flex:none}.card-export-status:empty{display:none}.card-export-actions[aria-busy=true] button{cursor:wait}
+
+/* Keep the artwork readable, with text grips above their anchor. */
+.card-preview-pane{position:relative}
+.card-handle-toggle{position:absolute;left:6px;top:6px;z-index:4;border:1px solid var(--line);border-radius:8px;background:#fffffff2;color:var(--green);padding:8px 10px;min-height:40px;font:11px var(--sans);cursor:pointer}
+.card-handle-toggle:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.card-edit-stage .card-text-handle{transform:translate(-50%,calc(-100% - 14px));width:32px;height:26px;border-radius:8px;font-size:16px;background:#fffffff0;color:var(--green)}
+.card-text-handle:after{content:"";position:absolute;top:100%;left:50%;height:13px;border-left:1px dashed var(--green);pointer-events:none}
+.card-edit-stage .card-text-handle.selected{background:#e7f1eb;color:var(--green);box-shadow:0 0 0 2px #ffffffb0}
+@media(max-width:700px){
+ .bloom-light-workspace.lighting-open .bloom-stage{position:sticky;top:8px;z-index:12;height:clamp(180px,30dvh,260px);min-height:0;animation:none;box-shadow:0 6px 20px #173b3324}
+ .bloom-light-workspace.lighting-open .orbit-hint{bottom:10px;font-size:10px}
+ .bloom-light-workspace.lighting-open .reveal-status{top:10px;font-size:10px}
+ .bloom-light-workspace.lighting-open .studio-setting{scroll-margin-top:calc(30dvh + 28px)}
+ .bloom-light-workspace.lighting-open .studio-light-panel{margin-top:16px}
+ .card-edit-stage .card-text-handle{width:36px;height:28px}
+}
+@media(max-width:700px){
+ .bloom-light-workspace.lighting-open .replay-controls{display:none}
+ .bloom-light-workspace.lighting-open .viewer-controls{padding:8px 0}
+ .bloom-light-workspace.lighting-open .studio-light-panel{max-height:48dvh;overflow-y:auto;overscroll-behavior:contain;scroll-padding:16px;-webkit-overflow-scrolling:touch;margin-bottom:0}
+ .bloom-light-workspace.lighting-open .studio-setting{scroll-margin-top:16px}
+}
+
+/* A single bounded workspace keeps the live canvas and all lighting controls together. */
+.bloom-light-workspace.lighting-open{position:relative;top:auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;gap:12px 24px;height:min(720px,calc(100dvh - 24px));scroll-margin-top:12px;margin-bottom:28px;background:var(--surface)}
+.bloom-light-workspace.lighting-open .bloom-stage{grid-column:1;grid-row:1;position:relative;top:auto;height:100%;min-height:0;animation:none}
+.bloom-light-workspace.lighting-open .viewer-controls{grid-column:1;grid-row:2;padding:0;flex-wrap:wrap;gap:8px}
+.bloom-light-workspace.lighting-open .replay-controls{display:none}
+.bloom-light-workspace.lighting-open .studio-light-panel{grid-column:2;grid-row:1 / 3;min-height:0;max-height:none;height:100%;width:100%;max-width:none;margin:0;padding:20px;overflow-y:auto;overscroll-behavior:contain;scroll-padding:16px;box-sizing:border-box}
+.bloom-light-workspace.lighting-open .studio-light-grid{grid-template-columns:1fr;gap:12px;margin-top:16px}
+.bloom-light-workspace.lighting-open .studio-light-panel summary span{display:block;margin:6px 0 0}
+.bloom-light-workspace.lighting-open .studio-light-footer{align-items:stretch;flex-direction:column;gap:8px}
+.bloom-light-workspace.lighting-open .studio-setting{scroll-margin-top:16px}
+@media(max-width:700px){
+ .bloom-light-workspace.lighting-open{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(150px,30dvh) auto minmax(0,1fr);gap:10px;height:calc(100dvh - 24px)}
+ .bloom-light-workspace.lighting-open .studio-light-panel{grid-column:1;grid-row:3;padding:16px}
+ .bloom-light-workspace.lighting-open .viewer-controls{padding:0}
+ .bloom-light-workspace.lighting-open .bloom-stage{height:100%;min-height:0;position:relative;top:auto}
+ .bloom-light-workspace.lighting-open .camera-controls{flex-wrap:wrap}
+}
