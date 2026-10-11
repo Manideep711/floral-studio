@@ -76,8 +76,11 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
   const lastCommand=useRef(-1);
   const previousFactor=useRef(distanceFactor);
   const temp=useMemo(()=>new THREE.Object3D(),[]);
-  const groups=useMemo(()=>flowers.map(f=>f.id).map(kind=>({kind,items:placements.filter(p=>p.flower===kind),geometry:makeFlowerGeometry(kind,lowQuality)})),[placements,lowQuality]);
-  useEffect(()=>()=>groups.forEach(g=>g.geometry.dispose()),[groups]);
+  // Reuse flower surfaces across layer changes; only quality changes rebuild them.
+  const geometries=useMemo(()=>flowers.map(f=>({kind:f.id,geometry:makeFlowerGeometry(f.id,lowQuality)})),[lowQuality]);
+  useEffect(()=>()=>geometries.forEach(g=>g.geometry.dispose()),[geometries]);
+  const groups=useMemo(()=>geometries.map(g=>({...g,items:placements.filter(p=>p.flower===g.kind)})),[placements,geometries]);
+  const layerIndices=useMemo(()=>new Map(design.layers.map((layer,index)=>[layer.id,index])),[design.layers]);
   useEffect(()=>{
     const lost=(e:Event)=>{e.preventDefault();onFailure();};gl.domElement.addEventListener("webglcontextlost",lost);
     // The story follows page scroll; camera controls would capture wheel and touch gestures.
@@ -90,7 +93,7 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
     const changed=()=>invalidate();orbit.addEventListener("change",changed);
     return ()=>{controls.current=null;orbit.removeEventListener("change",changed);orbit.dispose();gl.domElement.removeEventListener("webglcontextlost",lost);};
   },[camera,gl,invalidate,onFailure,storyProgress]);
-  useEffect(()=>{groups.forEach((group,i)=>{const mesh=flowerMeshes.current[i];if(!mesh)return;group.items.forEach((p,j)=>mesh.setColorAt(j,new THREE.Color(p.color).multiplyScalar(.95+(p.scale-.91)*.45)));if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;});if(!active.current){elapsed.current=REVEAL_SECONDS;active.current=true;refreshOnly.current=true;metrics.current.valid=false;}invalidate();},[groups,invalidate]);
+  useEffect(()=>{groups.forEach((group,i)=>{const mesh=flowerMeshes.current[i];if(!mesh)return;mesh.count=group.items.length;group.items.forEach((p,j)=>mesh.setColorAt(j,new THREE.Color(p.color).multiplyScalar(.95+(p.scale-.91)*.45)));if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;});if(!active.current){elapsed.current=REVEAL_SECONDS;active.current=true;refreshOnly.current=true;metrics.current.valid=false;}invalidate();},[groups,invalidate]);
   useEffect(()=>{onReady();invalidate();},[onReady,invalidate]);
   useFrame((_,delta)=>{
     if(storyProgress && storyGroup.current){
@@ -115,12 +118,12 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
     groups.forEach((group,i)=>{
       const mesh=flowerMeshes.current[i];if(!mesh)return;
       group.items.forEach((p,j)=>{
-        const index=design.layers.findIndex(l=>l.id===p.layerId),depth=revealAt(t,index,design.layers.length).depth;
+        const index=layerIndices.get(p.layerId)!,depth=revealAt(t,index,design.layers.length).depth;
         temp.position.set(p.x*.01,.045+p.y*.01*depth+state.settle*depth,p.z*.01);
         const layer=design.layers[index],slope=p.accent ? .95 : design.layoutVersion===2 ? Math.atan(layer.rise/layer.width) : 0;
         const scale=p.scale*flowerAppearance[p.flower].worldScale;
         temp.rotation.set(-slope*depth,-p.rotation,0,"YXZ");temp.scale.set(scale,.025+(scale-.025)*depth,scale);temp.updateMatrix();mesh.setMatrixAt(j,temp.matrix);
-      });mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();
+      });mesh.instanceMatrix.needsUpdate=true;if(!storyProgress&&t>=REVEAL_SECONDS)mesh.computeBoundingSphere();
     });
     if(support.current){support.current.scale.y=Math.max(.001,state.depth);support.current.visible=state.depth>.05;}
     if(!refreshOnly.current && !storyProgress){camera.up.set(0,state.camera,-(1-state.camera)).normalize();
@@ -143,7 +146,7 @@ function Scene({stage="studio",design,reducedMotion,command,onPhase,onReady,onFa
     <directionalLight position={[4,2.5,3]} intensity={lighting.fillPower} color={lighting.fill}/>
     <directionalLight position={[1.5,4,-4]} intensity={lighting.rimPower} color={lighting.rim}/>
     <group ref={storyGroup}>
-    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={storyProgress ? .64 : .78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
+    {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,storyProgress ? Math.max(512,2**Math.ceil(Math.log2(Math.max(1,g.items.length)))) : g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={storyProgress ? .64 : .78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
     <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
     <mesh position={[0,-.01,0]} receiveShadow><cylinderGeometry args={[1.88,1.83,.065,96]}/><meshStandardMaterial color="#B69A60" metalness={.72} roughness={.32} envMapIntensity={.35}/></mesh>
     <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D5B979" metalness={.78} roughness={.28} envMapIntensity={.4}/></mesh>
