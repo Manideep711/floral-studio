@@ -695,3 +695,16 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
  .template-option:active .template-preview img,.template-starters button:active img { transform:scale(1.04); }
  .flower-option:active { transform:scale(.98); }
 }
+.garden-dialog { border-color:#e1e9e5; border-radius:24px; background:#fff; box-shadow:0 24px 90px #153d3426; }
+.garden-dialog .garden-close { top:18px; right:18px; display:grid; place-items:center; border:0; background:#f2f6f4; border-radius:50%; }
+.garden-dialog .garden-mine>p { color:var(--muted); font-size:13px; }
+.garden-mine .mine-item { display:block; padding:20px; margin:20px 0; border:1px solid #dce7e0; border-radius:16px; background:#f8fbf9; }
+.mine-item-heading { display:flex; align-items:center; gap:12px; margin-bottom:20px; min-width:0; }
+.mine-flower-mark { display:grid; place-items:center; flex-shrink:0; width:44px; height:44px; border-radius:12px; background:#e9f2ec; color:#28634f; }
+.mine-item .mine-item-heading strong { font:500 17px/1.5 var(--sans); overflow-wrap:break-word; min-width:0; }
+.mine-item-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.mine-item-actions .secondary-button { min-height:44px; padding:10px 12px; font-size:12px; justify-content:center; border-color:#cfdfd5; border-radius:9px; background:white; }
+.mine-item-actions .text-button { grid-column:1/-1; justify-self:start; padding:8px 0 0; font-size:11px; color:#966056; }
+.garden-mine>.text-button { font-size:12px; }
+@media(max-width:500px) { .garden-dialog-inner { padding:30px 24px; } .garden-dialog h2 { margin:22px 0 12px; font-size:27px; } .garden-mine .mine-item { padding:16px; } }
+.garden-dialog { width:min(520px,calc(100vw - 28px)); min-width:0; }

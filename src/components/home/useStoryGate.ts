@@ -7,7 +7,7 @@ export function useStoryGate(root:RefObject<HTMLDivElement|null>,step:number,red
   const smooth=useRef<Lenis|null>(null),maximum=useRef<()=>number>(()=>Infinity);
   useEffect(()=>{
     const lenis=new Lenis({
-      autoRaf:true,lerp:.12,smoothWheel:true,syncTouch:false,anchors:true,
+      autoRaf:true,lerp:.12,smoothWheel:true,syncTouch:false,anchors:false,
       respectReducedMotion:true,stopInertiaOnNavigate:true,
       virtualScroll:data=>{
         if((data.event.target as Element|null)?.closest?.("dialog"))return true;
@@ -74,4 +74,13 @@ export function useStoryGate(root:RefObject<HTMLDivElement|null>,step:number,red
       window.removeEventListener("keydown",key);window.removeEventListener("resize",constrain);
     };
   },[root,step,reduced]);
+  return ()=>{
+    const chapter=root.current?.querySelector<HTMLElement>("#story-layer-1");
+    if(!chapter)return;
+    const margin=parseFloat(getComputedStyle(chapter).scrollMarginTop)||32;
+    const top=Math.min(maximum.current(),Math.max(0,chapter.getBoundingClientRect().top+window.scrollY-margin));
+    const finish=()=>{chapter.focus({preventScroll:true});window.history.replaceState(null,"","#story-layer-1");};
+    if(smooth.current)smooth.current.scrollTo(top,{immediate:!!reduced,duration:1.35,lerp:0,easing:t=>t*t*t*(t*(t*6-15)+10),onComplete:finish});
+    else {chapter.scrollIntoView({behavior:reduced ? "instant" : "smooth",block:"start"});finish();}
+  };
 }
