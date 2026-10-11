@@ -745,3 +745,6 @@ html,body,dialog,[data-lenis-prevent],.layers-list { scrollbar-width: thin; scro
  .studio-page .studio-bottom .bloom-next .shiny-button { width:auto; min-height:48px; padding:12px 18px; }
  .studio-page .studio-bottom .backup-menu { min-width:0; }
 }
+.page-edge-blur { transition:opacity 180ms ease-out; }
+@media(max-width:700px) { .page-edge-blur { height:54px!important; } .page-edge-blur>div:nth-child(3) { backdrop-filter:blur(3px)!important; -webkit-backdrop-filter:blur(3px)!important; } .page-edge-blur>div:nth-child(4) { backdrop-filter:blur(6px)!important; -webkit-backdrop-filter:blur(6px)!important; } }
+@media(prefers-reduced-motion:reduce) { .page-edge-blur { transition:none; } }
