@@ -6,7 +6,8 @@ import {RoomEnvironment} from "three/examples/jsm/environments/RoomEnvironment.j
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {makeFlowerGeometry} from "@/lib/three/flowers";
 import {flowerAppearance} from "@/lib/flowers/appearance";
-import {generateLayout} from "@/lib/design/layout";
+import {storyLayerDepth} from "@/lib/three/story";
+import {generateLayout,type Placement} from "@/lib/design/layout";
 import {revealAt,REVEAL_SECONDS} from "@/lib/three/reveal";
 import type {Design} from "@/lib/design/schema";
 import {flowers,type FlowerId} from "@/lib/flowers/catalog";
@@ -23,13 +24,13 @@ const stages={
 } as const;
 // Hero lighting retains directional highlights even in the lightweight mobile renderer.
 const heroLighting={...stages.studio,ambient:.08,hemisphere:.28,keyPower:2.5,fillPower:.55,rimPower:1.15,environment:.2};
-type Props={settings?:StudioSettings;stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
+type Props={preparedPlacements?:Placement[];settings?:StudioSettings;stage?:StageStyle;design:Design;reducedMotion:boolean;command:SceneCommand;onPhase:(phase:string)=>void;onReady:()=>void;onFailure:()=>void;onMetrics:(metrics:SceneMetrics)=>void;onCapture?:(capture:BloomCapture|null)=>void;lowQuality:boolean;storyProgress?:MotionValue<number>};
 export default function BathukammaScene(props:Props) {
   // Canvas fallback is ordinary canvas child content, mounted even when WebGL
   // works. Only renderer errors/context loss should activate the 2D fallback.
   return <Canvas shadows={props.lowQuality ? false : "percentage"} dpr={props.lowQuality ? 1 : [1,1.5]} frameloop="demand" camera={{position:[0,7,.001],fov:38,near:.1,far:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power",toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:props.storyProgress ? 1 : .92}} fallback={<span>Interactive 3D Bathukamma.</span>}><Scene {...props}/></Canvas>;
 }
-function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
+function Scene({preparedPlacements,settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMotion,command,onPhase,onReady,onFailure,onMetrics,onCapture,lowQuality,storyProgress}:Props) {
   const {camera,gl,invalidate,size,scene}=useThree();
   const lighting=useMemo(()=>{if(storyProgress)return heroLighting;const base=stages[stage];return {...base,keyPower:base.keyPower*settings.key,fillPower:base.fillPower*settings.fill,rimPower:base.rimPower*settings.rim,ambient:base.ambient*settings.ambient,environment:base.environment*settings.environment};},[storyProgress,stage,settings]);
   useEffect(()=>{if(storyProgress)return;gl.toneMappingExposure=settings.exposure;if(camera instanceof THREE.PerspectiveCamera){camera.fov=settings.fov;camera.updateProjectionMatrix();}invalidate();},[settings.exposure,settings.fov,storyProgress,camera,gl,invalidate]);
@@ -41,7 +42,7 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
     return ()=>{scene.environment=previous;scene.environmentIntensity=previousIntensity;map.dispose();};
   },[gl,scene,invalidate]);
   useEffect(()=>{scene.environmentIntensity=lighting.environment;invalidate();},[lighting,scene,invalidate]);
-  const placements=useMemo(()=>generateLayout(design),[design]);
+  const placements=useMemo(()=>preparedPlacements??generateLayout(design),[preparedPlacements,design]);
   const height=design.layers.reduce((s,l)=>s+l.rise,0)*.01;
   const contact=useMemo(()=>{
     const pixels=new Uint8Array(64*64*4);
@@ -54,11 +55,23 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
   useEffect(()=>()=>contact.dispose(),[contact]);
   useEffect(()=>{
     const capture:BloomCapture=async()=>{
+      if(gl.getContext().isContextLost())throw new Error("3D context unavailable");
       const w=lowQuality?768:1024,h=Math.round(w*.8),oldSize=gl.getSize(new THREE.Vector2()),ratio=gl.getPixelRatio(),background=scene.background,clear=gl.getClearColor(new THREE.Color()),alpha=gl.getClearAlpha();
       const floor=scene.getObjectByName("studio-floor"),floorVisible=floor?.visible;
       const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const context=canvas.getContext("2d");if(!context)throw new Error("Capture unavailable");
       try{scene.background=null;if(floor)floor.visible=false;gl.setClearColor(0x000000,0);gl.setPixelRatio(1);gl.setSize(w,h,false);
-        const photo=(camera as THREE.PerspectiveCamera).clone();photo.aspect=w/h;photo.updateProjectionMatrix();gl.render(scene,photo);context.drawImage(gl.domElement,0,0,w,h);
+        const photo=(camera as THREE.PerspectiveCamera).clone();photo.aspect=w/h;photo.updateProjectionMatrix();
+        // Fit the complete sculpture into the export, including the plate, while retaining the chosen angle and lens.
+        const bounds=new THREE.Box3().setFromObject(storyGroup.current!,true),center=bounds.getCenter(new THREE.Vector3()),direction=photo.position.clone().sub(center).normalize();
+        let distance=photo.position.distanceTo(center);
+        for(let attempt=0;attempt<60;attempt++){
+          photo.position.copy(center).addScaledVector(direction,distance);photo.lookAt(center);photo.updateMatrixWorld();
+          let fits=true;
+          for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){const point=new THREE.Vector3(x,y,z).project(photo);if(Math.abs(point.x)>.9||Math.abs(point.y)>.9||point.z>1)fits=false;}
+          if(fits)break;distance*=1.06;
+        }
+        gl.render(scene,photo);context.drawImage(gl.domElement,0,0,w,h);
+        const pixels=context.getImageData(0,0,w,h).data;if(!pixels.some((value,index)=>index%4===3&&value>10))throw new Error("The 3D capture was empty");
       }finally{scene.background=background;if(floor)floor.visible=floorVisible!;gl.setClearColor(clear,alpha);gl.setPixelRatio(ratio);gl.setSize(oldSize.x,oldSize.y,false);gl.render(scene,camera);invalidate();}
       return new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob ? resolve(blob) : reject(new Error("Capture failed")),"image/png"));
     };
@@ -67,6 +80,8 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
   const distanceFactor=Math.max(storyProgress ? .82 : 1,(storyProgress ? .94 : 1.15)/(size.width/size.height));
   const flowerMeshes=useRef<(THREE.InstancedMesh|null)[]>([]);
   const support=useRef<THREE.Group>(null);
+  const storyLayers=useRef(new Set<string>()),storyAdded=useRef(new Set<string>()),storyElapsed=useRef(.5),storyFirstFrame=useRef(false),storyHeight=useRef(height),storyStartHeight=useRef(height);
+  const coreMeshes=useRef<(THREE.Mesh|null)[]>([]);
   const storyGroup=useRef<THREE.Group>(null);
   useEffect(()=>storyProgress?.on("change",()=>invalidate()),[storyProgress,invalidate]);
   const elapsed=useRef(reducedMotion ? REVEAL_SECONDS : 0);
@@ -82,6 +97,7 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
   const geometries=useMemo(()=>flowers.map(f=>({kind:f.id,geometry:makeFlowerGeometry(f.id,lowQuality)})),[lowQuality]);
   useEffect(()=>()=>geometries.forEach(g=>g.geometry.dispose()),[geometries]);
   const groups=useMemo(()=>geometries.map(g=>({...g,items:placements.filter(p=>p.flower===g.kind)})),[placements,geometries]);
+  const layerBases=useMemo(()=>{let y=0;return new Map(design.layers.map(layer=>{const pair:[string,number]=[layer.id,y];y+=layer.rise*.01;return pair;}));},[design.layers]);
   const layerIndices=useMemo(()=>new Map(design.layers.map((layer,index)=>[layer.id,index])),[design.layers]);
   useEffect(()=>{
     const lost=(e:Event)=>{e.preventDefault();onFailure();};gl.domElement.addEventListener("webglcontextlost",lost);
@@ -95,14 +111,15 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
     const changed=()=>invalidate();orbit.addEventListener("change",changed);
     return ()=>{controls.current=null;orbit.removeEventListener("change",changed);orbit.dispose();gl.domElement.removeEventListener("webglcontextlost",lost);};
   },[camera,gl,invalidate,onFailure,storyProgress]);
-  useEffect(()=>{groups.forEach((group,i)=>{const mesh=flowerMeshes.current[i];if(!mesh)return;mesh.count=group.items.length;group.items.forEach((p,j)=>mesh.setColorAt(j,new THREE.Color(p.color).multiplyScalar(.95+(p.scale-.91)*.45)));if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;});if(!active.current){elapsed.current=REVEAL_SECONDS;active.current=true;refreshOnly.current=true;metrics.current.valid=false;}invalidate();},[groups,invalidate]);
+  useEffect(()=>{groups.forEach((group,i)=>{const mesh=flowerMeshes.current[i];if(!mesh)return;mesh.count=group.items.length;group.items.forEach((p,j)=>mesh.setColorAt(j,new THREE.Color(p.color).multiplyScalar(.95+(p.scale-.91)*.45)));if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;});if(storyProgress){storyAdded.current=new Set(design.layers.filter(l=>!storyLayers.current.has(l.id)).map(l=>l.id));const hadLayers=storyLayers.current.size>0;storyLayers.current=new Set(design.layers.map(l=>l.id));storyElapsed.current=hadLayers&&!reducedMotion&&storyAdded.current.size>0?0:.5;storyFirstFrame.current=true;storyStartHeight.current=storyHeight.current;active.current=true;}else if(!active.current){elapsed.current=REVEAL_SECONDS;active.current=true;refreshOnly.current=true;metrics.current.valid=false;}invalidate();},[groups,invalidate,storyProgress,design,reducedMotion]);
   useEffect(()=>{onReady();invalidate();},[onReady,invalidate]);
   useFrame((_,delta)=>{
     if(storyProgress && storyGroup.current){
+      storyElapsed.current=Math.min(.5,storyElapsed.current+delta);
+      storyHeight.current=THREE.MathUtils.lerp(storyStartHeight.current,height,storyLayerDepth(storyElapsed.current,true,reducedMotion));
       storyGroup.current.rotation.y=THREE.MathUtils.clamp(storyProgress.get(),0,1)*Math.PI*10;
-      camera.position.set(3.6*distanceFactor,(3.5+height*.5)*distanceFactor,5*distanceFactor);
-      controls.current?.target.set(0,height*.32,0);
-      camera.lookAt(0,height*.32,0);
+      camera.position.set(3.6*distanceFactor,(3.5+storyHeight.current*.5)*distanceFactor,5*distanceFactor);
+      camera.lookAt(0,storyHeight.current*.32,0);
     }
     const orbit=controls.current;
     if(command.id!==lastCommand.current){
@@ -118,20 +135,27 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
     const t=elapsed.current,state=revealAt(t);
     if(phaseRef.current!==state.phase){phaseRef.current=state.phase;onPhase(state.phase);}
     groups.forEach((group,i)=>{
-      const mesh=flowerMeshes.current[i];if(!mesh)return;
+      const mesh=flowerMeshes.current[i];if(!mesh)return;let changed=false;
       group.items.forEach((p,j)=>{
-        const index=layerIndices.get(p.layerId)!,depth=revealAt(t,index,design.layers.length).depth;
-        temp.position.set(p.x*.01,.045+p.y*.01*depth+state.settle*depth,p.z*.01);
+        const index=layerIndices.get(p.layerId)!;
+        if(storyProgress&&!storyFirstFrame.current&&!storyAdded.current.has(p.layerId))return;
+        const depth=storyProgress?storyLayerDepth(storyElapsed.current,storyAdded.current.has(p.layerId),reducedMotion):revealAt(t,index,design.layers.length).depth;
+        const base=storyProgress?layerBases.get(p.layerId)!:0;
+        temp.position.set(p.x*.01,.045+base+(p.y*.01-base)*depth+(storyProgress?0:state.settle*depth),p.z*.01);
         const layer=design.layers[index],slope=p.accent ? .95 : design.layoutVersion===2 ? Math.atan(layer.rise/layer.width) : 0;
         const scale=p.scale*flowerAppearance[p.flower].worldScale;
-        temp.rotation.set(-slope*depth,-p.rotation,0,"YXZ");temp.scale.set(scale,.025+(scale-.025)*depth,scale);temp.updateMatrix();mesh.setMatrixAt(j,temp.matrix);
-      });mesh.instanceMatrix.needsUpdate=true;if(!storyProgress&&t>=REVEAL_SECONDS)mesh.computeBoundingSphere();
+        temp.rotation.set(-slope*depth,-p.rotation,0,"YXZ");temp.scale.set(scale,.025+(scale-.025)*depth,scale);temp.updateMatrix();mesh.setMatrixAt(j,temp.matrix);changed=true;
+      });if(changed)mesh.instanceMatrix.needsUpdate=true;if(!storyProgress&&t>=REVEAL_SECONDS)mesh.computeBoundingSphere();
     });
     if(support.current){support.current.scale.y=Math.max(.001,state.depth);support.current.visible=state.depth>.05;}
     if(!refreshOnly.current && !storyProgress){camera.up.set(0,state.camera,-(1-state.camera)).normalize();
     const target=new THREE.Vector3(0,height*.32*state.camera,0);
     camera.position.set(3.6*state.camera*distanceFactor,THREE.MathUtils.lerp(7,(3.5+height*.5)*distanceFactor,state.camera),5*state.camera*distanceFactor+.001);
     camera.lookAt(target);if(orbit){orbit.target.copy(target);orbit.enabled=t>=REVEAL_SECONDS;}}
+    if(storyProgress){
+      let below=0;design.layers.forEach((layer,index)=>{const mesh=coreMeshes.current[index],depth=storyLayerDepth(storyElapsed.current,storyAdded.current.has(layer.id),reducedMotion),coreHeight=layer.rise*.01*(index===design.layers.length-1?.65:1);if(mesh){mesh.scale.y=Math.max(.001,depth);mesh.position.y=below+coreHeight*depth*.5-.07;}below+=layer.rise*.01;});
+      storyFirstFrame.current=false;if(storyElapsed.current>=.5)active.current=false;else invalidate();return;
+    }
     metrics.current.frames++;metrics.current.time+=delta;
     if(t>=REVEAL_SECONDS){active.current=false;refreshOnly.current=false;orbit?.update();onMetrics({flowers:placements.length,drawCalls:gl.info.render.calls,triangles:gl.info.render.triangles,revealFps:metrics.current.valid ? Math.round(metrics.current.frames/Math.max(.01,metrics.current.time)) : 0});}
     invalidate();
@@ -149,7 +173,7 @@ function Scene({settings=DEFAULT_STUDIO_SETTINGS,stage="studio",design,reducedMo
     <directionalLight position={[1.5,4,-4]} intensity={lighting.rimPower} color={lighting.rim}/>
     <group ref={storyGroup}>
     {groups.map((g,i)=><instancedMesh key={g.kind} ref={node=>{flowerMeshes.current[i]=node;}} args={[g.geometry,undefined,storyProgress ? Math.max(512,2**Math.ceil(Math.log2(Math.max(1,g.items.length)))) : g.items.length]} castShadow receiveShadow frustumCulled={false}><meshStandardMaterial vertexColors roughness={storyProgress ? .64 : .78} envMapIntensity={.08} metalness={0} side={THREE.DoubleSide}/></instancedMesh>)}
-    <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
+    <group ref={support}>{design.layers.map((layer,i)=>{const y=design.layers.slice(0,i).reduce((s,l)=>s+l.rise,0)*.01,coreHeight=layer.rise*.01*(i===design.layers.length-1?.65:1);return <mesh key={layer.id} ref={node=>{coreMeshes.current[i]=node;}} position={[0,y+coreHeight*.5-.07,0]} receiveShadow><cylinderGeometry args={[Math.max(.008,(layer.radius-layer.width)*.01-.055),Math.max(.03,layer.radius*.01-.055),coreHeight,48]}/><meshStandardMaterial color="#344127" roughness={1}/></mesh>;})}</group>
     <mesh position={[0,-.01,0]} receiveShadow><cylinderGeometry args={[1.88,1.83,.065,96]}/><meshStandardMaterial color="#B69A60" metalness={.72} roughness={.32} envMapIntensity={.35}/></mesh>
     <mesh rotation={[Math.PI/2,0,0]} position={[0,.025,0]}><torusGeometry args={[1.84,.035,8,96]}/><meshStandardMaterial color="#D5B979" metalness={.78} roughness={.28} envMapIntensity={.4}/></mesh>
     </group>

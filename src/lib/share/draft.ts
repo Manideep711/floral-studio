@@ -1,0 +1,10 @@
+import {CARD_FONTS,type CardSettings} from "./card";
+const position=(v:unknown)=>typeof v==="number"&&Number.isFinite(v)&&v>=0&&v<=100;
+export function validCardDraft(value:unknown):value is CardSettings{
+ if(!value||typeof value!=="object")return false;
+ const s=value as CardSettings,b=s.bloom,l=s.link;
+ return typeof s.background==="string"&&s.background.length<15_000_000&&Array.isArray(s.layers)&&s.layers.length<=40&&s.layers.every(t=>typeof t.id==="string"&&typeof t.text==="string"&&t.text.length<=240&&CARD_FONTS.includes(t.font)&&/^#[0-9a-f]{6}$/i.test(t.color)&&position(t.x)&&position(t.y)&&Number.isFinite(t.size)&&t.size>=16&&t.size<=120&&Number.isFinite(t.rotation)&&Math.abs(t.rotation)<=45&&["left","center","right"].includes(t.align))&&!!b&&typeof b.visible==="boolean"&&position(b.x)&&position(b.y)&&position(b.scale)&&b.scale>=20&&Number.isFinite(b.rotation)&&Math.abs(b.rotation)<=45&&!!l&&typeof l.visible==="boolean"&&typeof l.qr==="boolean"&&typeof l.url==="string"&&typeof l.label==="string"&&position(l.x)&&position(l.y);
+}
+function database(){return new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open("bathukamma-card-drafts",1);request.onupgradeneeded=()=>request.result.createObjectStore("drafts");request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});}
+export async function readCardDraft(){const db=await database();try{return await new Promise<CardSettings|null>((resolve,reject)=>{const request=db.transaction("drafts").objectStore("drafts").get("current");request.onsuccess=()=>resolve(validCardDraft(request.result)?request.result:null);request.onerror=()=>reject(request.error);});}finally{db.close();}}
+export async function saveCardDraft(settings:CardSettings){const db=await database();try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction("drafts","readwrite");tx.objectStore("drafts").put(settings,"current");tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});}finally{db.close();}}

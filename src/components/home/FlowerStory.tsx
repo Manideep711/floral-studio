@@ -1,10 +1,11 @@
 "use client";
 import {useLanguage} from "@/lib/i18n/LanguageProvider";
-import {Component,useCallback,useEffect,useRef,useState,type ReactNode} from "react";
+import {Component,useCallback,useEffect,useRef,useState,useMemo,type ReactNode} from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {motion,useScroll,useTransform,useReducedMotion,useMotionValue} from "motion/react";
-import {guidedDesign,GUIDED_KEY} from "@/lib/design/guided";
+import {guidedFrames} from "@/lib/three/story";
+import {GUIDED_KEY} from "@/lib/design/guided";
 import {templates,templateDesign} from "@/lib/design/templates";
 import type {Design} from "@/lib/design/schema";
 import ArrangementCanvas from "../studio/ArrangementCanvas";
@@ -35,7 +36,8 @@ const chapters=[
 export default function FlowerStory(){
   const {tr,locale}=useLanguage();
   const root=useRef<HTMLDivElement>(null),chapterRefs=useRef<Array<HTMLElement|null>>([]);
-  const [step,setStep]=useState(0),[design,setDesign]=useState<Design>(()=>guidedDesign());
+  const frames=useMemo(guidedFrames,[]);
+  const [step,setStep]=useState(0),[design,setDesign]=useState<Design>(()=>frames[0].design);
   const canCustomise=step===4;
   const [selectedTemplate,setSelectedTemplate]=useState("");
   const [heroDelay,setHeroDelay]=useState(2.35);
@@ -82,7 +84,7 @@ export default function FlowerStory(){
   const loaded=useCallback(()=>setReady(true),[]),failed=useCallback(()=>setSupported(false),[]);
   const advance=(next:number)=>{
     if(next!==step+1||step>=4)return;
-    setStep(next);setDesign(guidedDesign(next));
+    setStep(next);setDesign(frames[next].design);
   };
   const fallback=<ArrangementCanvas design={design} selected="" onSelect={nothing} profile/>;
   return <div ref={root} className="flower-story" data-guided-step={step}>
@@ -98,7 +100,7 @@ export default function FlowerStory(){
       </section>
     </div>
     <aside className="story-visual-track" aria-label={tr("Live Bathukamma preview")}><motion.figure className="story-visual" style={{x:reduced ? 0 : sideways,y:reduced ? 0 : downward}}><div className="story-visual-heading"><span role="status">{step===0 ? tr("Your Bathukamma") : tr(`${design.layers.length} layers`)}</span><span>{tr("3D preview")}</span></div><div className="story-sculpture" role="img" aria-label={tr(`${design.layers.length} layers`)}>
-      {supported&&<StoryBoundary fallback={fallback} onFailure={failed}><Scene design={design} reducedMotion command={skip} lowQuality onPhase={nothing} onMetrics={nothing} onReady={loaded} onFailure={failed} storyProgress={reduced ? still : rotation}/></StoryBoundary>}
+      {supported&&<StoryBoundary fallback={fallback} onFailure={failed}><Scene preparedPlacements={selectedTemplate?undefined:frames[step].placements} design={design} reducedMotion command={skip} lowQuality onPhase={nothing} onMetrics={nothing} onReady={loaded} onFailure={failed} storyProgress={reduced ? still : rotation}/></StoryBoundary>}
       {(!supported||!ready)&&<div className="story-sculpture-fallback">{fallback}</div>}
     </div></motion.figure></aside>
   </div>;

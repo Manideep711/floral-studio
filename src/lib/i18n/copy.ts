@@ -1,6 +1,10 @@
 export type Locale="en"|"te";
 // Interface copy only. Never translate a user's title, nickname, or message.
 const pairs=`
+Open navigation|మెనూ తెరవండి
+Close navigation|మెనూ మూసివేయండి
+Update mine|నాది నవీకరించండి
+Update my Bathukamma|నా బతుకమ్మను నవీకరించండి
 Bathukamma|బతుకమ్మ
 Bathukamma.|బతుకమ్మ
 Make a|మీ
