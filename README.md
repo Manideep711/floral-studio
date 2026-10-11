@@ -72,3 +72,5 @@ Use Node 24 and run `npm run verify` for tests, the full production build and Ty
 ## Premium component pass
 
 The interface now uses adapted shadcn/ui Radix tabs, sliders and tooltips, Magic UI Blur Fade with reduced-motion handling, and locally hosted Fraunces/Manrope typography. See docs/component-sources.md for provenance, licenses, dependency versions and QA. Garden and card design work remains paused; model, draft, authentication and database flows are preserved.
+
+After creating garden.sql, apply supabase/one-per-owner-upgrade.sql (also required for existing deployments). Each account has one garden entry; save_garden_entry updates it atomically without moving its slot. Earlier duplicates are retained in the private garden_private.duplicate_entries archive, inaccessible to browser roles.
